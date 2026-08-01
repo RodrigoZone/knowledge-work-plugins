@@ -1,0 +1,2142 @@
+<title>SDR Autônomo — Console (mockup)</title>
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Tokens. Mono = verdade da máquina. Sans = linguagem do operador.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --bg:        #E8EAEE;
+  --surface:   #F7F8FA;
+  --surface-2: #FFFFFF;
+  --surface-3: #E1E4EA;
+  --ink:       #15181F;
+  --ink-2:     #4A5262;
+  --ink-3:     #79808F;
+  --line:      #D0D5DE;
+  --line-2:    #BEC4CF;
+  --accent:    #2B3FD1;
+  --accent-ink:#FFFFFF;
+  --accent-soft: rgba(43, 63, 209, .10);
+  --ok:        #0E7A57;
+  --ok-soft:   rgba(14, 122, 87, .12);
+  --warn:      #9A6608;
+  --warn-soft: rgba(154, 102, 8, .13);
+  --bad:       #B0362A;
+  --bad-soft:  rgba(176, 54, 42, .12);
+  --mute-soft: rgba(90, 100, 120, .12);
+  --shadow:    0 1px 2px rgba(20,24,31,.06), 0 8px 24px -12px rgba(20,24,31,.18);
+  --radius:    7px;
+
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #0F1216;
+    --surface:   #161A21;
+    --surface-2: #1B2029;
+    --surface-3: #232A35;
+    --ink:       #E7EAF0;
+    --ink-2:     #A4ACBB;
+    --ink-3:     #737C8C;
+    --line:      #29303B;
+    --line-2:    #39424F;
+    --accent:    #8B97FF;
+    --accent-ink:#10131A;
+    --accent-soft: rgba(139, 151, 255, .14);
+    --ok:        #45C295;
+    --ok-soft:   rgba(69, 194, 149, .14);
+    --warn:      #DFA84E;
+    --warn-soft: rgba(223, 168, 78, .14);
+    --bad:       #F0796B;
+    --bad-soft:  rgba(240, 121, 107, .14);
+    --mute-soft: rgba(150, 162, 185, .12);
+    --shadow:    0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #0F1216;
+  --surface:   #161A21;
+  --surface-2: #1B2029;
+  --surface-3: #232A35;
+  --ink:       #E7EAF0;
+  --ink-2:     #A4ACBB;
+  --ink-3:     #737C8C;
+  --line:      #29303B;
+  --line-2:    #39424F;
+  --accent:    #8B97FF;
+  --accent-ink:#10131A;
+  --accent-soft: rgba(139, 151, 255, .14);
+  --ok:        #45C295;
+  --ok-soft:   rgba(69, 194, 149, .14);
+  --warn:      #DFA84E;
+  --warn-soft: rgba(223, 168, 78, .14);
+  --bad:       #F0796B;
+  --bad-soft:  rgba(240, 121, 107, .14);
+  --mute-soft: rgba(150, 162, 185, .12);
+  --shadow:    0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+:root[data-theme="light"] {
+  --bg:        #E8EAEE;
+  --surface:   #F7F8FA;
+  --surface-2: #FFFFFF;
+  --surface-3: #E1E4EA;
+  --ink:       #15181F;
+  --ink-2:     #4A5262;
+  --ink-3:     #79808F;
+  --line:      #D0D5DE;
+  --line-2:    #BEC4CF;
+  --accent:    #2B3FD1;
+  --accent-ink:#FFFFFF;
+  --accent-soft: rgba(43, 63, 209, .10);
+  --ok:        #0E7A57;
+  --ok-soft:   rgba(14, 122, 87, .12);
+  --warn:      #9A6608;
+  --warn-soft: rgba(154, 102, 8, .13);
+  --bad:       #B0362A;
+  --bad-soft:  rgba(176, 54, 42, .12);
+  --mute-soft: rgba(90, 100, 120, .12);
+  --shadow:    0 1px 2px rgba(20,24,31,.06), 0 8px 24px -12px rgba(20,24,31,.18);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 14px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ── shell ────────────────────────────────────────────────── */
+.shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+
+.rail {
+  background: var(--surface); border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 4px; padding: 18px 12px 24px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.rail__brand { padding: 0 8px 16px; display: flex; flex-direction: column; gap: 3px; }
+.rail__mark {
+  font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--accent);
+}
+.rail__sub { font-size: 12px; color: var(--ink-3); }
+.rail__group {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-3); padding: 16px 8px 6px;
+}
+.navbtn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; text-align: left; padding: 7px 9px; border: 1px solid transparent;
+  border-radius: 6px; background: none; color: var(--ink-2);
+  font: inherit; font-size: 13.5px; cursor: pointer;
+}
+.navbtn:hover { background: var(--surface-3); color: var(--ink); }
+.navbtn[aria-current="true"] {
+  background: var(--accent-soft); color: var(--accent); font-weight: 600;
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.navbtn__count {
+  font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums;
+  color: var(--ink-3); background: var(--surface-3); border-radius: 999px; padding: 1px 7px;
+}
+.navbtn[aria-current="true"] .navbtn__count { background: transparent; color: inherit; }
+
+/* ── topbar ───────────────────────────────────────────────── */
+.top {
+  position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 20px; padding: 12px 26px; flex-wrap: wrap;
+}
+.top__title { display: flex; flex-direction: column; gap: 1px; margin-right: auto; }
+.top__title h1 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+.top__title p { margin: 0; font-size: 12.5px; color: var(--ink-3); }
+
+.tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px; border: 1px dashed var(--line-2); color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.quota { display: flex; flex-direction: column; gap: 4px; min-width: 148px; }
+.quota__head {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.quota__bar { height: 5px; border-radius: 3px; background: var(--surface-3); overflow: hidden; position: relative; }
+.quota__fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .5s ease; }
+.quota__fill--warn { background: var(--warn); }
+.quota__fill--bad { background: var(--bad); }
+.quota__mark { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--ink-3); opacity: .7; }
+
+/* ── layout blocks ────────────────────────────────────────── */
+.view { padding: 22px 26px 60px; display: flex; flex-direction: column; gap: 18px; }
+.grid { display: grid; gap: 14px; }
+.grid--3 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.split { display: grid; gap: 14px; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; }
+@media (max-width: 900px) { .split { grid-template-columns: minmax(0, 1fr); } }
+
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); display: flex; flex-direction: column; min-width: 0;
+}
+.card__head {
+  display: flex; align-items: baseline; gap: 12px; padding: 13px 16px;
+  border-bottom: 1px solid var(--line); flex-wrap: wrap;
+}
+.card__head h2 { margin: 0; font-size: 13px; font-weight: 650; letter-spacing: -.005em; }
+.card__head p { margin: 0; font-size: 12px; color: var(--ink-3); }
+.card__head .spacer { margin-left: auto; }
+.card__body { padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card__body--flush { padding: 0; }
+
+.eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ── kpi ──────────────────────────────────────────────────── */
+.kpi { display: flex; flex-direction: column; gap: 6px; padding: 15px 16px; }
+.kpi__val {
+  font-family: var(--mono); font-size: 30px; font-weight: 600; letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.kpi__label { font-size: 12.5px; color: var(--ink-2); }
+.kpi__note { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+/* ── chips ────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em;
+  padding: 2.5px 7px; border-radius: 4px; background: var(--mute-soft); color: var(--ink-2);
+  border: 1px solid transparent;
+}
+.chip--ok   { background: var(--ok-soft);   color: var(--ok); }
+.chip--warn { background: var(--warn-soft); color: var(--warn); }
+.chip--bad  { background: var(--bad-soft);  color: var(--bad); }
+.chip--accent { background: var(--accent-soft); color: var(--accent); }
+.chip--rule { border-color: color-mix(in srgb, var(--ink-3) 40%, transparent); background: transparent; font-weight: 600; }
+.chip__dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex: none; }
+
+/* ── buttons ──────────────────────────────────────────────── */
+.btn {
+  font: inherit; font-size: 13px; padding: 7px 13px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--line-2); background: var(--surface-2); color: var(--ink);
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--ink-3); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn--primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn--primary:hover { filter: brightness(1.08); border-color: var(--accent); }
+.btn--sm { font-size: 12px; padding: 4px 9px; }
+.btn--ghost { background: transparent; border-color: var(--line); color: var(--ink-2); }
+
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field > label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+input[type="text"], input[type="number"], select {
+  font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 6px;
+  border: 1px solid var(--line-2); background: var(--surface-2); color: var(--ink); width: 100%;
+}
+input[type="number"] { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ── tables ───────────────────────────────────────────────── */
+.tablewrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th {
+  text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 500;
+  padding: 9px 14px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.tbl td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tbl tbody tr:last-child td { border-bottom: none; }
+.tbl tbody tr.is-clickable { cursor: pointer; }
+.tbl tbody tr.is-clickable:hover { background: var(--surface-3); }
+.tbl .num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.person { display: flex; flex-direction: column; gap: 1px; }
+.person__name { font-weight: 600; }
+.person__meta { font-size: 12px; color: var(--ink-3); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.dim { color: var(--ink-3); }
+
+/* ── funil ────────────────────────────────────────────────── */
+.funnel { display: flex; flex-direction: column; gap: 9px; }
+.fstep { display: grid; grid-template-columns: 132px minmax(0, 1fr) 42px; gap: 10px; align-items: center; }
+.fstep__label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; color: var(--ink-2); }
+.fstep__track { height: 20px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+.fstep__fill { height: 100%; background: var(--accent); opacity: .85; border-radius: 4px; transition: width .5s ease; }
+.fstep__n { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
+
+/* ── passos do pipeline (execução) ────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 0; }
+.step {
+  display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px;
+  padding: 9px 0; border-bottom: 1px dashed var(--line);
+}
+.step:last-child { border-bottom: none; }
+.step__idx {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3); padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.step__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.step__title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.step__detail { font-size: 12.5px; color: var(--ink-2); }
+.step--pending { opacity: .42; }
+
+.console {
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.65; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 6px; padding: 11px 13px;
+  max-height: 260px; overflow: auto; white-space: pre-wrap; word-break: break-word;
+}
+.console b { color: var(--accent); font-weight: 600; }
+.console i { color: var(--ink-3); font-style: normal; }
+
+/* ── regras ───────────────────────────────────────────────── */
+.rule { border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.rule__head { display: flex; align-items: center; gap: 10px; padding: 10px 13px; flex-wrap: wrap; }
+.rule__desc { font-size: 13px; }
+.rule__body {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+  padding: 0 13px 12px; font-family: var(--mono); font-size: 11.5px;
+}
+.rule__col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rule__col > span:first-child { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.rule__cond { color: var(--ink-2); word-break: break-word; }
+.rule--fired { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-soft) inset; }
+
+.diagram { overflow-x: auto; }
+.diagram svg { display: block; min-width: 780px; width: 100%; height: auto; }
+
+/* ── gaveta ───────────────────────────────────────────────── */
+.scrim {
+  position: fixed; inset: 0; background: rgba(10, 13, 18, .45); z-index: 40;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+}
+.scrim.is-open { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 92vw); z-index: 41;
+  background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow);
+  transform: translateX(102%); transition: transform .24s ease;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.drawer.is-open { transform: none; }
+.drawer__head { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start; }
+.drawer__body { padding: 16px 18px 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+.deflist { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 7px 12px; font-size: 13px; align-items: baseline; }
+.deflist dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.deflist dd { margin: 0; word-break: break-word; }
+
+.cond { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 9px; align-items: baseline; }
+.cond__txt { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); word-break: break-word; }
+
+.timeline { display: flex; flex-direction: column; gap: 0; border-left: 1px solid var(--line-2); margin-left: 5px; }
+.tl { position: relative; padding: 0 0 14px 18px; }
+.tl:last-child { padding-bottom: 0; }
+.tl::before {
+  content: ""; position: absolute; left: -4.5px; top: 5px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--accent); border: 2px solid var(--surface);
+}
+.tl__when { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+.tl__what { font-size: 13px; display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+
+/* ── avisos ───────────────────────────────────────────────── */
+.notice {
+  display: flex; gap: 11px; align-items: flex-start; padding: 11px 14px;
+  border-radius: 6px; border: 1px solid; font-size: 13px;
+}
+.notice--warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); color: var(--ink); }
+.notice--bad  { background: var(--bad-soft);  border-color: color-mix(in srgb, var(--bad) 38%, transparent);  color: var(--ink); }
+.notice--info { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 28%, transparent); color: var(--ink); }
+.notice--ok   { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 32%, transparent); color: var(--ink); }
+.notice strong { font-weight: 650; }
+
+.empty { padding: 26px 16px; text-align: center; color: var(--ink-3); font-size: 13px; }
+.row { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.hr { height: 1px; background: var(--line); border: 0; margin: 2px 0; }
+.suggest { display: flex; gap: 6px; flex-wrap: wrap; }
+.suggest button {
+  font-family: var(--mono); font-size: 11.5px; padding: 3.5px 9px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: transparent; color: var(--ink-2); cursor: pointer;
+}
+.suggest button:hover { border-color: var(--accent); color: var(--accent); }
+
+.logline { display: grid; grid-template-columns: 52px 74px minmax(0, 1fr); gap: 12px; padding: 7px 14px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+.logline:last-child { border-bottom: none; }
+.logline__ts { font-family: var(--mono); font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.logline__msg { min-width: 0; word-break: break-word; }
+
+@media (max-width: 780px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .rail__brand { padding-bottom: 0; width: 100%; }
+  .rail__group { display: none; }
+  .navbtn { width: auto; }
+  .view { padding: 18px 14px 50px; }
+  .top { padding: 12px 14px; }
+  .deflist { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+
+<div class="shell">
+  <nav class="rail" aria-label="Seções">
+    <div class="rail__brand">
+      <span class="rail__mark">SDR Autônomo</span>
+      <span class="rail__sub">Class Solutions</span>
+    </div>
+    <div id="nav"></div>
+  </nav>
+
+  <main>
+    <header class="top">
+      <div class="top__title">
+        <h1 id="viewTitle">Painel</h1>
+        <p id="viewSub">Visão geral do pipeline</p>
+      </div>
+      <span class="tag">Mockup · dados fictícios</span>
+      <div class="quota" id="quotaApollo"></div>
+      <div class="quota" id="quotaSalesnav"></div>
+    </header>
+    <div class="view" id="view"></div>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Detalhe do contato" aria-hidden="true">
+  <div class="drawer__head" id="drawerHead"></div>
+  <div class="drawer__body" id="drawerBody"></div>
+</aside>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════
+   1. FONTES DE VERDADE — transcrição fiel de config.yaml e rules.yaml.
+      O motor abaixo interpreta estas estruturas; nenhuma regra de
+      negócio vive no restante do código (CLAUDE.md).
+   ═══════════════════════════════════════════════════════════════ */
+
+const CONFIG = {
+  target_titles: ["CIO", "CTO", "Diretor de TI", "Diretor de Tecnologia", "Head de Transformação Digital", "Gerente de TI"],
+  seniority_order: ["c_suite", "vp", "director", "head", "manager"],
+  max_contacts_per_company: 3,
+  guessed_email_ttl_days: 7,
+  match_timeout_hours: 48,
+  validation_freshness_days: 30,
+  salesnav_monthly_update_limit: 1000,
+  apollo_credit_alert_pct: 80
+};
+
+const STATE_MACHINE = {
+  initial: "NOVO",
+  transitions: {
+    NOVO:          ["ENRIQUECIDO", "EMPRESA_NAO_ENCONTRADA", "SEM_EMAIL"],
+    ENRIQUECIDO:   ["EM_VALIDACAO", "SEM_EMAIL"],
+    EM_VALIDACAO:  ["VALIDADO", "INVALIDO_SAIU_EMPRESA", "REVISAO_MANUAL"],
+    VALIDADO:      ["EM_CADENCIA", "INVALIDO_SAIU_EMPRESA"],
+    EM_CADENCIA:   ["RESPONDEU", "SEM_RESPOSTA", "INVALIDO_BOUNCE", "INVALIDO_SAIU_EMPRESA"]
+  }
+};
+
+const RULES = [
+  { id: "R1.1", grupo: "R1 · Resolução de empresa", description: "Empresa ambígua exige confirmação de domínio",
+    when: [{ field: "company.match_count", op: "gt", value: 1 }],
+    then: [{ action: "require_domain_confirmation" }, { action: "log", level: "warning" }] },
+  { id: "R1.2", grupo: "R1 · Resolução de empresa", description: "Empresa não encontrada encerra o fluxo",
+    when: [{ field: "company.match_count", op: "eq", value: 0 }],
+    then: [{ action: "set_status", value: "EMPRESA_NAO_ENCONTRADA" }, { action: "notify", channel: "teams" }, { action: "stop_pipeline" }] },
+
+  { id: "R2.1", grupo: "R2 · Seleção de contatos", description: "Cargo deve estar na lista alvo (config.target_titles)",
+    when: [{ field: "contact.title_matched", op: "eq", value: false }],
+    then: [{ action: "discard_candidate" }] },
+  { id: "R2.2", grupo: "R2 · Seleção de contatos", description: "Máximo de contatos por empresa (config.max_contacts_per_company)",
+    when: [{ field: "company.selected_count", op: "gte", value: "${config.max_contacts_per_company}" }],
+    then: [{ action: "discard_candidate" }] },
+  { id: "R2.3", grupo: "R2 · Seleção de contatos", description: "Ordenar candidatos por senioridade antes da seleção",
+    when: [{ field: "pipeline.stage", op: "eq", value: "selection" }],
+    then: [{ action: "sort_candidates", by: "seniority_rank" }] },
+
+  { id: "R3.1", grupo: "R3 · Qualidade de e-mail", description: "Só e-mail verified segue para validação",
+    when: [{ field: "contact.email_status", op: "eq", value: "verified" }],
+    then: [{ action: "set_status", value: "EM_VALIDACAO" }] },
+  { id: "R3.2", grupo: "R3 · Qualidade de e-mail", description: "E-mail guessed fica pendente; descarte após janela",
+    when: [{ field: "contact.email_status", op: "eq", value: "guessed" },
+           { field: "contact.days_since_enrichment", op: "gt", value: "${config.guessed_email_ttl_days}" }],
+    then: [{ action: "discard_candidate" }, { action: "log", level: "info" }] },
+  { id: "R3.3", grupo: "R3 · Qualidade de e-mail", description: "Sem e-mail vira tarefa manual de LinkedIn",
+    when: [{ field: "contact.email_status", op: "eq", value: "unavailable" }],
+    then: [{ action: "set_status", value: "SEM_EMAIL" }, { action: "create_task", type: "linkedin_manual_outreach" }] },
+
+  { id: "R4.1", grupo: "R4 · Validação LinkedIn", description: "Sem match no Sales Navigator após janela → revisão manual",
+    when: [{ field: "contact.crm_matched", op: "eq", value: false },
+           { field: "contact.hours_since_created", op: "gt", value: "${config.match_timeout_hours}" }],
+    then: [{ action: "set_status", value: "REVISAO_MANUAL" }, { action: "create_task", type: "manual_match_review" }] },
+  { id: "R4.2", grupo: "R4 · Validação LinkedIn", description: "CRÍTICA: Not At Company bloqueia cadência definitivamente", priority: "highest",
+    when: [{ field: "contact.not_at_company", op: "eq", value: true }],
+    then: [{ action: "set_status", value: "INVALIDO_SAIU_EMPRESA" }, { action: "remove_from_cadence" }, { action: "log", level: "warning" }] },
+  { id: "R4.3", grupo: "R4 · Validação LinkedIn", description: "Substituto sugerido pelo LinkedIn entra como novo contato",
+    when: [{ field: "contact.replacement_suggested", op: "eq", value: true }],
+    then: [{ action: "create_contact_from_replacement", initial_status: "NOVO" }] },
+  { id: "R4.4", grupo: "R4 · Validação LinkedIn", description: "Cargo/local desatualizado deve ser corrigido antes da cadência",
+    when: [{ field: "contact.stale_fields", op: "not_empty" }],
+    then: [{ action: "update_crm_fields", source: "linkedin_validation" }] },
+  { id: "R4.5", grupo: "R4 · Validação LinkedIn", description: "Valor Ignore na validação é exclusivamente humano",
+    when: [{ field: "event.type", op: "eq", value: "set_validation_ignore" },
+           { field: "event.actor", op: "neq", value: "human" }],
+    then: [{ action: "reject_event" }, { action: "log", level: "error" }] },
+
+  { id: "R5.1", grupo: "R5 · Cadência", description: "CRÍTICA: gate de entrada na cadência", priority: "highest",
+    when: [{ field: "contact.email_status", op: "eq", value: "verified" },
+           { field: "contact.not_at_company", op: "eq", value: false },
+           { field: "contact.days_since_validation", op: "lte", value: "${config.validation_freshness_days}" },
+           { field: "contact.status", op: "eq", value: "VALIDADO" }],
+    then: [{ action: "set_status", value: "EM_CADENCIA" }],
+    else: [{ action: "block_cadence" }] },
+  { id: "R5.2", grupo: "R5 · Cadência", description: "Resposta pausa a cadência",
+    when: [{ field: "event.type", op: "eq", value: "reply_received" }],
+    then: [{ action: "set_status", value: "RESPONDEU" }, { action: "notify", channel: "teams" }] },
+  { id: "R5.3", grupo: "R5 · Cadência", description: "Bounce invalida imediatamente",
+    when: [{ field: "event.type", op: "eq", value: "email_bounced" }],
+    then: [{ action: "set_status", value: "INVALIDO_BOUNCE" }, { action: "remove_from_cadence" }] },
+
+  { id: "R6.1", grupo: "R6 · Limites e conformidade", description: "Respeitar limite mensal de updates do Sales Navigator",
+    when: [{ field: "quota.salesnav_updates_month", op: "gte", value: "${config.salesnav_monthly_update_limit}" }],
+    then: [{ action: "pause_pipeline" }, { action: "notify", channel: "teams" }] },
+  { id: "R6.2", grupo: "R6 · Limites e conformidade", description: "Alerta de consumo de créditos Apollo",
+    when: [{ field: "quota.apollo_credits_used_pct", op: "gte", value: "${config.apollo_credit_alert_pct}" }],
+    then: [{ action: "notify", channel: "teams" }] },
+  { id: "R6.3", grupo: "R6 · Limites e conformidade", description: "LGPD — opt-out honrado na hora",
+    when: [{ field: "event.type", op: "eq", value: "opt_out_received" }],
+    then: [{ action: "remove_from_cadence" }, { action: "set_field", field: "do_not_contact", value: true },
+           { action: "create_task", type: "lgpd_erasure", sla_hours: 48 }] },
+  { id: "R6.4", grupo: "R6 · Limites e conformidade", description: "PROIBIÇÃO: qualquer acesso automatizado não-oficial ao LinkedIn",
+    when: [{ field: "event.type", op: "eq", value: "linkedin_direct_access_attempt" }],
+    then: [{ action: "reject_event" }, { action: "log", level: "critical" }] }
+];
+
+const ERROR_HANDLING = [
+  { erro: "apollo_timeout",      retry: 3, backoff: "exponential", on_fail: "pause_pipeline" },
+  { erro: "apollo_rate_limited", retry: 3, backoff: "exponential", on_fail: "pause_pipeline" },
+  { erro: "apollo_no_credits",   retry: 0, backoff: "—",           on_fail: "pause_pipeline + notify" },
+  { erro: "dynamics_auth_error", retry: 1, backoff: "—",           on_fail: "stop_pipeline + notify" },
+  { erro: "dynamics_throttled",  retry: 5, backoff: "exponential", on_fail: "pause_pipeline" },
+  { erro: "unknown",             retry: 0, backoff: "—",           on_fail: "stop_pipeline + notify" }
+];
+
+const FIELD_MAP = {
+  account: [
+    ["name", "organization.name"], ["websiteurl", "organization.website_url"],
+    ["numberofemployees", "organization.estimated_num_employees"],
+    ["industrycode_text", "organization.industry"], ["new_apollo_org_id", "organization.id"]
+  ],
+  contact: [
+    ["firstname", "person.first_name"], ["lastname", "person.last_name"], ["jobtitle", "person.title"],
+    ["emailaddress1", "person.email"], ["new_email_status", "person.email_status"],
+    ["new_linkedin_url", "person.linkedin_url"], ["new_apollo_person_id", "person.id"],
+    ["new_sdr_status", "computed: pipeline_status"], ["parentcustomerid", "lookup: account.new_apollo_org_id"]
+  ],
+  validation: [
+    ["li_notatcompany", "not_at_company — escrito pelo Sales Navigator"],
+    ["li_crmbadge", "crm_matched — escrito pelo Sales Navigator"]
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   2. MOTOR DE REGRAS — espelha src/sdr/rules_engine.py
+   ═══════════════════════════════════════════════════════════════ */
+
+const OPS = {
+  eq:  (a, b) => a === b,
+  neq: (a, b) => a !== b,
+  gt:  (a, b) => a != null && a > b,
+  gte: (a, b) => a != null && a >= b,
+  lt:  (a, b) => a != null && a < b,
+  lte: (a, b) => a != null && a <= b,
+  not_empty: (a) => Array.isArray(a) ? a.length > 0 : Boolean(a)
+};
+
+function resolveValue(v) {
+  if (typeof v === "string") {
+    const m = v.match(/^\$\{config\.([a-z_]+)\}$/);
+    if (m) return CONFIG[m[1]];
+  }
+  return v;
+}
+
+const ORDERED_RULES = [...RULES].sort((a, b) =>
+  (a.priority === "highest" ? 0 : 1) - (b.priority === "highest" ? 0 : 1));
+
+function checkCond(cond, facts) {
+  if (!(cond.field in facts)) return false;
+  return OPS[cond.op](facts[cond.field], resolveValue(cond.value));
+}
+
+function toDecision(rule, branch, matched) {
+  const actions = branch.map(a => a.action);
+  const setStatus = branch.find(a => a.action === "set_status");
+  return { rule_id: rule.id, matched, actions, raw: branch, new_status: setStatus ? setStatus.value : null };
+}
+
+/** Avalia todas as regras contra um dicionário de fatos com chaves pontilhadas. */
+function evaluate(facts) {
+  const out = [];
+  for (const rule of ORDERED_RULES) {
+    const matched = rule.when.every(c => checkCond(c, facts));
+    const branch = matched ? rule.then : rule.else;
+    if (!branch) continue;
+    if (!matched && !rule.when.every(c => c.field in facts)) continue; // gate só se os fatos existem
+    out.push(toDecision(rule, branch, matched));
+  }
+  return out;
+}
+
+function canTransition(from, to) {
+  return (STATE_MACHINE.transitions[from] || []).includes(to);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. DADOS DE DEMONSTRAÇÃO (fictícios)
+   ═══════════════════════════════════════════════════════════════ */
+
+const HOUR = 3600e3, DAY = 24 * HOUR;
+const now = () => Date.now();
+const hoursAgo = h => now() - h * HOUR;
+const daysAgo  = d => now() - d * DAY;
+
+const STATUS_META = {
+  NOVO:                   { tone: "",       label: "Novo" },
+  ENRIQUECIDO:            { tone: "",       label: "Enriquecido" },
+  EM_VALIDACAO:           { tone: "warn",   label: "Em validação" },
+  VALIDADO:               { tone: "ok",     label: "Validado" },
+  EM_CADENCIA:            { tone: "accent", label: "Em cadência" },
+  RESPONDEU:              { tone: "ok",     label: "Respondeu" },
+  SEM_RESPOSTA:           { tone: "",       label: "Sem resposta" },
+  INVALIDO_SAIU_EMPRESA:  { tone: "bad",    label: "Saiu da empresa" },
+  INVALIDO_BOUNCE:        { tone: "bad",    label: "Bounce" },
+  REVISAO_MANUAL:         { tone: "warn",   label: "Revisão manual" },
+  SEM_EMAIL:              { tone: "warn",   label: "Sem e-mail" },
+  EMPRESA_NAO_ENCONTRADA: { tone: "bad",    label: "Empresa não encontrada" }
+};
+
+const EMAIL_META = {
+  verified:    { tone: "ok",   label: "verified" },
+  guessed:     { tone: "warn", label: "guessed" },
+  unavailable: { tone: "bad",  label: "unavailable" }
+};
+
+const DB = {
+  quotas: {
+    apollo: { total: 500, used: 398 },
+    salesnav: { limit: CONFIG.salesnav_monthly_update_limit, used: 947 }
+  },
+  pipelinePaused: false,
+  companies: [
+    { id: "nlt", apollo_org_id: "5f3a01", name: "Nordeste Log Transportes", domain: "nordestelog.com.br", employees: 1240, industry: "Logística" },
+    { id: "bde", apollo_org_id: "5f3a02", name: "Bandeirante Energia",      domain: "bandeiranteenergia.com.br", employees: 3410, industry: "Energia" },
+    { id: "msa", apollo_org_id: "5f3a03", name: "Meridiano Saúde",          domain: "meridianosaude.com.br", employees: 820,  industry: "Saúde" },
+    { id: "tcp", apollo_org_id: "5f3a04", name: "TecPar Indústria",         domain: "tecpar.ind.br",         employees: 2110, industry: "Manufatura" },
+    { id: "ats", apollo_org_id: "5f3a05", name: "Atlântico Seguros",        domain: "atlanticoseguros.com.br", employees: 5600, industry: "Seguros" },
+    { id: "vvc", apollo_org_id: "5f3a06", name: "Vale Verde Cooperativa",   domain: "valeverde.coop.br",     employees: 450,  industry: "Agronegócio" }
+  ],
+  contacts: [],
+  tasks: [],
+  logs: [],
+  runs: []
+};
+
+let SEQ = 100;
+const nextId = () => "c" + (++SEQ);
+
+function addContact(c) {
+  const contact = Object.assign({
+    id: nextId(), apollo_person_id: "p" + (SEQ + 4000),
+    email: null, email_status: "unavailable", linkedin_url: null,
+    status: "NOVO", not_at_company: false, crm_matched: false,
+    replacement_suggested: false, stale_fields: [], do_not_contact: false,
+    created_at: hoursAgo(2), enriched_at: null, validated_at: null,
+    dynamics_contact_id: "8a1e-" + Math.random().toString(16).slice(2, 8),
+    trace: []
+  }, c);
+  DB.contacts.push(contact);
+  return contact;
+}
+
+function seed() {
+  const s = [
+    ["nlt", "Renata", "Albuquerque", "Diretora de TI", "verified", "EM_CADENCIA", { validated_at: daysAgo(4), crm_matched: true, created_at: daysAgo(12), enriched_at: daysAgo(12) }],
+    ["nlt", "Paulo Sérgio", "Matos", "Gerente de TI", "verified", "VALIDADO", { validated_at: daysAgo(1), crm_matched: true, created_at: daysAgo(6), enriched_at: daysAgo(6) }],
+    ["nlt", "Cléber", "Nunes", "CIO", "guessed", "ENRIQUECIDO", { created_at: daysAgo(9), enriched_at: daysAgo(9) }],
+
+    ["bde", "Marcelo", "Tavares", "CTO", "verified", "INVALIDO_SAIU_EMPRESA", { not_at_company: true, crm_matched: true, created_at: daysAgo(21), enriched_at: daysAgo(21), validated_at: daysAgo(3) }],
+    ["bde", "Juliana", "Prado", "Head de Transformação Digital", "unavailable", "SEM_EMAIL", { created_at: daysAgo(3), enriched_at: daysAgo(3) }],
+    ["bde", "Fernanda", "Kruger", "Diretora de Tecnologia", "verified", "EM_CADENCIA", { validated_at: daysAgo(7), crm_matched: true, created_at: daysAgo(15), enriched_at: daysAgo(15) }],
+
+    ["msa", "Otávio", "Bittencourt", "CIO", "verified", "RESPONDEU", { validated_at: daysAgo(9), crm_matched: true, created_at: daysAgo(19), enriched_at: daysAgo(19) }],
+    ["msa", "Camila", "Ferrari", "Gerente de TI", "verified", "EM_VALIDACAO", { crm_matched: false, created_at: hoursAgo(61), enriched_at: hoursAgo(61) }],
+
+    ["tcp", "Ricardo", "Sampaio", "Diretor de TI", "verified", "EM_VALIDACAO", { crm_matched: true, created_at: hoursAgo(26), enriched_at: hoursAgo(26) }],
+    ["tcp", "Ana Lúcia", "Prata", "CTO", "verified", "EM_VALIDACAO", { crm_matched: true, not_at_company: true, replacement_suggested: true, created_at: hoursAgo(30), enriched_at: hoursAgo(30) }],
+    ["tcp", "Douglas", "Meireles", "Head de Transformação Digital", "guessed", "ENRIQUECIDO", { created_at: daysAgo(2), enriched_at: daysAgo(2) }],
+
+    ["ats", "Vera Lúcia", "Andrade", "CIO", "verified", "EM_CADENCIA", { validated_at: daysAgo(5), crm_matched: true, created_at: daysAgo(14), enriched_at: daysAgo(14) }],
+    ["ats", "Henrique", "Bastos", "Gerente de TI", "verified", "INVALIDO_BOUNCE", { validated_at: daysAgo(11), crm_matched: true, created_at: daysAgo(20), enriched_at: daysAgo(20) }],
+    ["ats", "Tatiana", "Rezende", "Diretora de Tecnologia", "verified", "SEM_RESPOSTA", { validated_at: daysAgo(29), crm_matched: true, created_at: daysAgo(38), enriched_at: daysAgo(38) }],
+
+    ["vvc", "Sérgio", "Kimura", "Diretor de TI", "verified", "EM_VALIDACAO", { crm_matched: true, created_at: hoursAgo(27), enriched_at: hoursAgo(27), stale_fields: ["jobtitle"] }],
+    ["vvc", "Marina", "Delgado", "Gerente de TI", "unavailable", "SEM_EMAIL", { created_at: daysAgo(5), enriched_at: daysAgo(5) }]
+  ];
+
+  for (const [company_id, first, last, title, email_status, status, extra] of s) {
+    const co = DB.companies.find(c => c.id === company_id);
+    const slug = (first + "." + last).toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
+    addContact(Object.assign({
+      company_id, first_name: first, last_name: last, title, email_status, status,
+      email: email_status === "unavailable" ? null : slug + "@" + co.domain,
+      linkedin_url: "linkedin.com/in/" + slug,
+      trace: [{ at: extra.created_at || hoursAgo(2), rule: "—", text: "Contato criado a partir do Apollo (people/match)" }]
+    }, extra));
+  }
+
+  DB.tasks = [
+    { id: "t1", type: "linkedin_manual_outreach", contact_id: DB.contacts.find(c => c.last_name === "Prado").id, rule: "R3.3", created_at: daysAgo(3), sla_hours: null, done: false },
+    { id: "t2", type: "linkedin_manual_outreach", contact_id: DB.contacts.find(c => c.last_name === "Delgado").id, rule: "R3.3", created_at: daysAgo(5), sla_hours: null, done: false }
+  ];
+
+  log("info", "R6.2", `Consumo Apollo em ${pct(DB.quotas.apollo.used, DB.quotas.apollo.total)}% — abaixo do alerta de ${CONFIG.apollo_credit_alert_pct}%`);
+  log("info", "—", "Último ciclo do Sales Navigator Data Validation concluído há 3h");
+  log("warning", "R4.2", "Marcelo Tavares marcado como Not At Company — removido da cadência");
+  log("warning", "R5.3", "Bounce em henrique.bastos@atlanticoseguros.com.br — contato invalidado");
+}
+
+/* Pools de candidatos usados pela simulação de prospecção. */
+const CANDIDATE_POOLS = {
+  "Litoral Farma": [
+    { first: "Gustavo", last: "Penteado", title: "CIO", email_status: "verified" },
+    { first: "Simone", last: "Vasconcelos", title: "Diretora de Tecnologia", email_status: "guessed" },
+    { first: "Priscila", last: "Amaral", title: "Head de Transformação Digital", email_status: "unavailable" },
+    { first: "Eduardo", last: "Lins", title: "Gerente de TI", email_status: "verified" },
+    { first: "Wagner", last: "Toledo", title: "Analista de Sistemas Sênior", email_status: "verified" },
+    { first: "Bianca", last: "Correia", title: "Coordenadora de Marketing", email_status: "verified" }
+  ],
+  "Vale do Sol Agro": [
+    { first: "Rogério", last: "Barcelos", title: "Diretor de TI", email_status: "verified" },
+    { first: "Isabel", last: "Fontenele", title: "Gerente de TI", email_status: "verified" },
+    { first: "Nelson", last: "Ávila", title: "Supervisor de Infraestrutura", email_status: "verified" }
+  ],
+  _default: [
+    { first: "Leandro", last: "Quintela", title: "CTO", email_status: "verified" },
+    { first: "Adriana", last: "Sobral", title: "Diretora de TI", email_status: "verified" },
+    { first: "Márcio", last: "Peixoto", title: "Gerente de TI", email_status: "guessed" },
+    { first: "Helena", last: "Trindade", title: "Head de Transformação Digital", email_status: "unavailable" },
+    { first: "Ivan", last: "Rocha", title: "Assistente Administrativo", email_status: "verified" }
+  ]
+};
+
+const COMPANY_INDEX = [
+  { name: "Nordeste Log Transportes", domain: "nordestelog.com.br", employees: 1240, industry: "Logística", id: "nlt" },
+  { name: "Bandeirante Energia", domain: "bandeiranteenergia.com.br", employees: 3410, industry: "Energia", id: "bde" },
+  { name: "Meridiano Saúde", domain: "meridianosaude.com.br", employees: 820, industry: "Saúde", id: "msa" },
+  { name: "TecPar Indústria", domain: "tecpar.ind.br", employees: 2110, industry: "Manufatura", id: "tcp" },
+  { name: "Atlântico Seguros", domain: "atlanticoseguros.com.br", employees: 5600, industry: "Seguros", id: "ats" },
+  { name: "Vale Verde Cooperativa", domain: "valeverde.coop.br", employees: 450, industry: "Agronegócio", id: "vvc" },
+  { name: "Vale do Sol Agro", domain: "valedosol.agr.br", employees: 690, industry: "Agronegócio", id: null },
+  { name: "Litoral Farma", domain: "litoralfarma.com.br", employees: 1580, industry: "Farmacêutica", id: null }
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   4. UTILITÁRIOS
+   ═══════════════════════════════════════════════════════════════ */
+
+const $  = sel => document.querySelector(sel);
+const esc = s => String(s == null ? "" : s)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const pct = (a, b) => Math.round((a / b) * 1000) / 10;
+const nrm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const company = id => DB.companies.find(c => c.id === id);
+const contact = id => DB.contacts.find(c => c.id === id);
+const byStatus = st => DB.contacts.filter(c => c.status === st);
+
+function clock(ts) {
+  return new Date(ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+function ago(ts) {
+  const h = (now() - ts) / HOUR;
+  if (h < 1) return Math.max(1, Math.round(h * 60)) + " min";
+  if (h < 48) return Math.round(h) + " h";
+  return Math.round(h / 24) + " d";
+}
+function log(level, rule, msg) {
+  DB.logs.unshift({ at: now(), level, rule, msg });
+  if (DB.logs.length > 240) DB.logs.pop();
+}
+function statusChip(st) {
+  const m = STATUS_META[st] || { tone: "" };
+  return `<span class="chip ${m.tone ? "chip--" + m.tone : ""}"><span class="chip__dot"></span>${esc(st)}</span>`;
+}
+function emailChip(es) {
+  const m = EMAIL_META[es];
+  return `<span class="chip chip--${m.tone}">${esc(m.label)}</span>`;
+}
+function ruleChip(id) { return `<span class="chip chip--rule">${esc(id)}</span>`; }
+
+function seniorityRank(title) {
+  const kw = { c_suite: ["cio", "cto", "ceo", "chief"], vp: ["vp", "vice"], director: ["diretor", "director", "diretora"], head: ["head"], manager: ["gerente", "manager"] };
+  const t = nrm(title);
+  for (let i = 0; i < CONFIG.seniority_order.length; i++) {
+    const level = CONFIG.seniority_order[i];
+    if ((kw[level] || []).some(k => t.includes(k))) return i;
+  }
+  return CONFIG.seniority_order.length;
+}
+/* Neutraliza a flexão de gênero antes de comparar cargos: "Diretora de
+   Tecnologia" precisa casar com o alvo "Diretor de Tecnologia". O
+   pipeline.py atual usa `target.lower() in title.lower()` e por isso
+   descarta silenciosamente cargos no feminino — divergência intencional
+   deste mockup, anotada no README. */
+const degender = s => nrm(s).replace(/ora\b/g, "or");
+
+function titleMatches(title) {
+  const t = degender(title);
+  return CONFIG.target_titles.some(target => t.includes(degender(target)));
+}
+
+/* Aplica uma transição respeitando a máquina de estados. */
+function transition(c, target, ruleId, text) {
+  if (!canTransition(c.status, target)) {
+    log("error", ruleId, `Transição inválida ${c.status} → ${target} bloqueada (${c.first_name} ${c.last_name})`);
+    return false;
+  }
+  c.status = target;
+  c.trace.push({ at: now(), rule: ruleId, text: text || `Status → ${target}` });
+  log("info", ruleId, `${c.first_name} ${c.last_name} → ${target}`);
+  return true;
+}
+
+function createTask(type, contactId, ruleId, slaHours) {
+  DB.tasks.push({ id: "t" + (++SEQ), type, contact_id: contactId, rule: ruleId, created_at: now(), sla_hours: slaHours || null, done: false });
+  log("info", ruleId, `Tarefa criada: ${type}`);
+}
+
+/* Verifica R6.1 / R6.2 a partir das quotas atuais. */
+function checkQuotas() {
+  const facts = {
+    "quota.apollo_credits_used_pct": pct(DB.quotas.apollo.used, DB.quotas.apollo.total),
+    "quota.salesnav_updates_month": DB.quotas.salesnav.used
+  };
+  const fired = evaluate(facts).filter(d => d.matched);
+  for (const d of fired) {
+    if (d.actions.includes("pause_pipeline")) {
+      DB.pipelinePaused = true;
+      log("critical", d.rule_id, "Limite mensal do Sales Navigator atingido — pipeline pausado");
+    } else {
+      log("warning", d.rule_id, `Notificação Teams: consumo Apollo em ${facts["quota.apollo_credits_used_pct"]}%`);
+    }
+  }
+  return fired;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. NAVEGAÇÃO
+   ═══════════════════════════════════════════════════════════════ */
+
+const VIEWS = [
+  { id: "painel",     label: "Painel",            sub: "Visão geral do pipeline",                     group: "Operação" },
+  { id: "prospeccao", label: "Prospecção",        sub: "Empresa → contatos enriquecidos no Dynamics", group: "Operação" },
+  { id: "pipeline",   label: "Pipeline",          sub: "Todos os contatos por estado",                group: "Operação", count: () => DB.contacts.length },
+  { id: "validacao",  label: "Validação LinkedIn", sub: "Sales Navigator Data Validation — ciclo de 24h", group: "Operação", count: () => byStatus("EM_VALIDACAO").length },
+  { id: "cadencia",   label: "Cadência",          sub: "Fila lida pelo Power Automate",               group: "Operação", count: () => byStatus("EM_CADENCIA").length },
+  { id: "tarefas",    label: "Tarefas",           sub: "Ações humanas geradas por regra",             group: "Operação", count: () => DB.tasks.filter(t => !t.done).length },
+  { id: "regras",     label: "Regras",            sub: "rules.yaml — fonte de verdade",               group: "Governança" },
+  { id: "config",     label: "Configuração",      sub: "config.yaml e mapeamento de campos",          group: "Governança" },
+  { id: "logs",       label: "Registro",          sub: "Log estruturado de decisões",                 group: "Governança", count: () => DB.logs.length }
+];
+
+let currentView = "painel";
+let drawerContact = null;
+
+function renderNav() {
+  const groups = [...new Set(VIEWS.map(v => v.group))];
+  $("#nav").innerHTML = groups.map(g => `
+    <div class="rail__group">${esc(g)}</div>
+    ${VIEWS.filter(v => v.group === g).map(v => `
+      <button class="navbtn" data-view="${v.id}" aria-current="${v.id === currentView}">
+        <span>${esc(v.label)}</span>
+        ${v.count ? `<span class="navbtn__count">${v.count()}</span>` : ""}
+      </button>`).join("")}
+  `).join("");
+}
+
+function renderQuotas() {
+  const a = DB.quotas.apollo, s = DB.quotas.salesnav;
+  const apct = pct(a.used, a.total), spct = pct(s.used, s.limit);
+  const tone = (p, limit) => p >= limit ? "quota__fill--bad" : p >= limit - 15 ? "quota__fill--warn" : "";
+  $("#quotaApollo").innerHTML = `
+    <div class="quota__head"><span>CRÉDITOS APOLLO</span><span>${a.used}/${a.total}</span></div>
+    <div class="quota__bar">
+      <div class="quota__fill ${tone(apct, CONFIG.apollo_credit_alert_pct)}" style="width:${Math.min(100, apct)}%"></div>
+      <div class="quota__mark" style="left:${CONFIG.apollo_credit_alert_pct}%" title="Alerta R6.2 em ${CONFIG.apollo_credit_alert_pct}%"></div>
+    </div>`;
+  $("#quotaSalesnav").innerHTML = `
+    <div class="quota__head"><span>UPDATES SALES NAV</span><span>${s.used}/${s.limit}</span></div>
+    <div class="quota__bar">
+      <div class="quota__fill ${tone(spct, 100)}" style="width:${Math.min(100, spct)}%"></div>
+    </div>`;
+}
+
+function go(id) {
+  currentView = id;
+  const v = VIEWS.find(x => x.id === id);
+  $("#viewTitle").textContent = v.label;
+  $("#viewSub").textContent = v.sub;
+  render();
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function render() {
+  renderNav();
+  renderQuotas();
+  const fn = { painel: viewPainel, prospeccao: viewProspeccao, pipeline: viewPipeline,
+               validacao: viewValidacao, cadencia: viewCadencia, tarefas: viewTarefas,
+               regras: viewRegras, config: viewConfig, logs: viewLogs }[currentView];
+  $("#view").innerHTML = fn();
+  if (currentView === "regras") drawStateMachine();
+  if (drawerContact) renderDrawer(drawerContact);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. TELAS
+   ═══════════════════════════════════════════════════════════════ */
+
+function bannerQuotas() {
+  const apct = pct(DB.quotas.apollo.used, DB.quotas.apollo.total);
+  const out = [];
+  if (DB.pipelinePaused) out.push(`<div class="notice notice--bad">${ruleChip("R6.1")}<div><strong>Pipeline pausado.</strong> O limite mensal de ${CONFIG.salesnav_monthly_update_limit} updates do Sales Navigator foi atingido. Nenhuma nova validação é solicitada até a virada do ciclo. Time notificado no Teams.</div></div>`);
+  if (apct >= CONFIG.apollo_credit_alert_pct) out.push(`<div class="notice notice--warn">${ruleChip("R6.2")}<div><strong>Consumo Apollo em ${apct}%.</strong> Acima do limiar de alerta de ${CONFIG.apollo_credit_alert_pct}%. Notificação enviada ao Teams; reponha créditos antes da próxima rodada.</div></div>`);
+  return out.join("");
+}
+
+const FUNNEL_ORDER = ["NOVO", "ENRIQUECIDO", "EM_VALIDACAO", "VALIDADO", "EM_CADENCIA", "RESPONDEU"];
+const LOSS_ORDER = ["SEM_EMAIL", "REVISAO_MANUAL", "INVALIDO_SAIU_EMPRESA", "INVALIDO_BOUNCE", "SEM_RESPOSTA"];
+
+function viewPainel() {
+  const total = DB.contacts.length;
+  const emCadencia = byStatus("EM_CADENCIA").length;
+  const aguardando = byStatus("EM_VALIDACAO").length;
+  const perdidos = LOSS_ORDER.reduce((n, s) => n + byStatus(s).length, 0);
+  const taxa = total ? Math.round((emCadencia / total) * 100) : 0;
+  const max = Math.max(1, ...FUNNEL_ORDER.map(s => byStatus(s).length));
+
+  return `
+    ${bannerQuotas()}
+    <div class="grid grid--3">
+      ${kpiCard(total, "Contatos no CRM", `${DB.companies.length} empresas prospectadas`)}
+      ${kpiCard(emCadencia, "Em cadência agora", `${taxa}% do total processado`)}
+      ${kpiCard(aguardando, "Aguardando LinkedIn", "ciclo oficial de 24h")}
+      ${kpiCard(perdidos, "Descartados por regra", "e-mail, saída da empresa, bounce")}
+    </div>
+
+    <div class="split">
+      <section class="card">
+        <div class="card__head">
+          <h2>Funil de prospecção</h2>
+          <p>estados canônicos, em ordem de avanço</p>
+        </div>
+        <div class="card__body">
+          <div class="funnel">
+            ${FUNNEL_ORDER.map(s => {
+              const n = byStatus(s).length;
+              return `<div class="fstep">
+                <span class="fstep__label">${esc(s)}</span>
+                <div class="fstep__track"><div class="fstep__fill" style="width:${(n / max) * 100}%"></div></div>
+                <span class="fstep__n">${n}</span>
+              </div>`;
+            }).join("")}
+          </div>
+          <hr class="hr">
+          <div class="eyebrow">Saídas do funil</div>
+          <div class="row">
+            ${LOSS_ORDER.map(s => `<span class="chip ${STATUS_META[s].tone ? "chip--" + STATUS_META[s].tone : ""}">${esc(s)} · ${byStatus(s).length}</span>`).join("")}
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h2>Simulador de eventos</h2>
+          <p>dispara as regras orientadas a evento</p>
+        </div>
+        <div class="card__body">
+          <p class="dim" style="margin:0;font-size:12.5px">Eventos que na produção chegam do Power Automate, do provedor de e-mail ou do formulário de opt-out. Cada botão passa os fatos pelo motor de regras real.</p>
+          <div class="stack">
+            ${eventBtn("reply_received", "Resposta recebida", "R5.2", "EM_CADENCIA")}
+            ${eventBtn("email_bounced", "E-mail retornou (bounce)", "R5.3", "EM_CADENCIA")}
+            ${eventBtn("opt_out_received", "Opt-out LGPD", "R6.3", "EM_CADENCIA")}
+            ${eventBtn("linkedin_direct_access_attempt", "Tentativa de acesso direto ao LinkedIn", "R6.4", null)}
+            ${eventBtn("set_validation_ignore", "Marcar validação como Ignore (por robô)", "R4.5", null)}
+          </div>
+          <div class="console" id="eventConsole"><i>Nenhum evento disparado nesta sessão.</i></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card__head">
+        <h2>Empresas prospectadas</h2>
+        <p>contatos por estado</p>
+        <span class="spacer"></span>
+        <button class="btn btn--sm" data-goto="prospeccao">Nova prospecção</button>
+      </div>
+      <div class="tablewrap">
+        <table class="tbl">
+          <thead><tr>
+            <th>Empresa</th><th>Domínio</th><th class="num">Func.</th>
+            <th class="num">Contatos</th><th class="num">Em cadência</th><th>Estados</th>
+          </tr></thead>
+          <tbody>
+            ${DB.companies.map(co => {
+              const cs = DB.contacts.filter(c => c.company_id === co.id);
+              const cad = cs.filter(c => c.status === "EM_CADENCIA").length;
+              return `<tr>
+                <td><span class="person__name">${esc(co.name)}</span><div class="person__meta">${esc(co.industry)}</div></td>
+                <td class="mono dim">${esc(co.domain)}</td>
+                <td class="num">${co.employees.toLocaleString("pt-BR")}</td>
+                <td class="num">${cs.length}</td>
+                <td class="num">${cad}</td>
+                <td><div class="row">${[...new Set(cs.map(c => c.status))].map(statusChip).join("")}</div></td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+function kpiCard(val, label, note) {
+  return `<div class="card"><div class="kpi">
+    <span class="kpi__val">${val}</span>
+    <span class="kpi__label">${esc(label)}</span>
+    <span class="kpi__note">${esc(note)}</span>
+  </div></div>`;
+}
+function eventBtn(type, label, rule, requires) {
+  const disabled = requires && byStatus(requires).length === 0;
+  return `<button class="btn" data-event="${type}" ${disabled ? "disabled" : ""}>
+    ${ruleChip(rule)}<span>${esc(label)}</span>
+  </button>`;
+}
+
+/* ── Prospecção ───────────────────────────────────────────── */
+let prospectState = { input: "", steps: [], running: false, pending: null, result: null };
+
+function viewProspeccao() {
+  const p = prospectState;
+  return `
+    ${bannerQuotas()}
+    <div class="split">
+      <section class="card">
+        <div class="card__head">
+          <h2>Rodar prospecção</h2>
+          <p>equivale a <span class="mono">cli run "Nome da Empresa"</span></p>
+        </div>
+        <div class="card__body">
+          <div class="field">
+            <label for="companyInput">Nome da empresa</label>
+            <input type="text" id="companyInput" value="${esc(p.input)}" placeholder="Ex.: Litoral Farma" autocomplete="off">
+          </div>
+          <div class="suggest">
+            <button data-fill="Litoral Farma">Litoral Farma — caminho feliz</button>
+            <button data-fill="Vale">Vale — ambígua (R1.1)</button>
+            <button data-fill="Sertão Mineração">Sertão Mineração — inexistente (R1.2)</button>
+          </div>
+          <div class="row">
+            <button class="btn btn--primary" id="runProspect" ${p.running || DB.pipelinePaused ? "disabled" : ""}>
+              ${p.running ? "Executando…" : "Executar pipeline"}
+            </button>
+            ${p.steps.length ? `<button class="btn btn--ghost btn--sm" id="clearProspect">Limpar</button>` : ""}
+          </div>
+          ${DB.pipelinePaused ? `<div class="notice notice--bad">${ruleChip("R6.1")}<div>Pipeline pausado pelo limite mensal do Sales Navigator. Nenhuma nova prospecção é executada.</div></div>` : ""}
+          ${p.pending ? renderPending(p.pending) : ""}
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h2>Execução</h2>
+          <p>cada passo mostra a regra aplicada</p>
+        </div>
+        <div class="card__body">
+          ${p.steps.length ? `<div class="steps">${p.steps.map((s, i) => renderStep(s, i)).join("")}</div>`
+                           : `<div class="empty">Escolha uma empresa e execute o pipeline para ver os passos.</div>`}
+        </div>
+      </section>
+    </div>
+
+    ${p.result ? renderRunResult(p.result) : ""}
+
+    <section class="card">
+      <div class="card__head"><h2>Histórico de execuções</h2><p>nesta sessão</p></div>
+      ${DB.runs.length ? `<div class="tablewrap"><table class="tbl">
+        <thead><tr><th>Hora</th><th>Empresa</th><th>Desfecho</th><th class="num">Candidatos</th><th class="num">Gravados</th><th class="num">Créditos</th></tr></thead>
+        <tbody>${DB.runs.map(r => `<tr>
+          <td class="mono dim">${clock(r.at)}</td>
+          <td>${esc(r.company)}</td>
+          <td>${r.outcome}</td>
+          <td class="num">${r.candidates}</td>
+          <td class="num">${r.saved}</td>
+          <td class="num">${r.credits}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>` : `<div class="empty">Nenhuma execução ainda.</div>`}
+    </section>`;
+}
+
+function renderStep(s, i) {
+  return `<div class="step ${s.pending ? "step--pending" : ""}">
+    <span class="step__idx">${String(i + 1).padStart(2, "0")}</span>
+    <div class="step__body">
+      <div class="step__title">
+        ${s.rule ? ruleChip(s.rule) : ""}
+        <strong>${esc(s.title)}</strong>
+        ${s.tone ? `<span class="chip chip--${s.tone}">${esc(s.badge || "")}</span>` : ""}
+      </div>
+      ${s.detail ? `<div class="step__detail">${s.detail}</div>` : ""}
+    </div>
+  </div>`;
+}
+
+function renderPending(p) {
+  return `<div class="notice notice--warn">
+    ${ruleChip("R1.1")}
+    <div>
+      <strong>Empresa ambígua: ${p.matches.length} correspondências.</strong>
+      Confirme o domínio antes de gastar crédito de enriquecimento.
+      <div class="row" style="margin-top:9px">
+        ${p.matches.map((m, i) => `<button class="btn btn--sm" data-confirm="${i}">${esc(m.name)} · <span class="mono">${esc(m.domain)}</span></button>`).join("")}
+        <button class="btn btn--sm btn--ghost" data-confirm="cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderRunResult(r) {
+  if (!r.contacts.length) return "";
+  return `<section class="card">
+    <div class="card__head"><h2>Contatos gravados no Dynamics</h2><p>${esc(r.company)}</p></div>
+    <div class="tablewrap"><table class="tbl">
+      <thead><tr><th>Contato</th><th>Cargo</th><th>E-mail</th><th>Qualidade</th><th>Estado</th><th>Regra</th></tr></thead>
+      <tbody>${r.contacts.map(c => `<tr class="is-clickable" data-contact="${c.id}">
+        <td><span class="person__name">${esc(c.first_name)} ${esc(c.last_name)}</span></td>
+        <td>${esc(c.title)}</td>
+        <td class="mono dim">${esc(c.email || "—")}</td>
+        <td>${emailChip(c.email_status)}</td>
+        <td>${statusChip(c.status)}</td>
+        <td>${ruleChip(c.trace[c.trace.length - 1].rule)}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+  </section>`;
+}
+
+async function runProspect(name, forcedMatch) {
+  const p = prospectState;
+  p.running = true; p.steps = []; p.result = null; p.pending = null;
+  const credits0 = DB.quotas.apollo.used;
+  render();
+
+  const push = async (step, delay) => { p.steps.push(step); render(); await sleep(delay == null ? 420 : delay); };
+
+  // 1. Resolução da empresa (Apollo /mixed_companies/search)
+  const matches = forcedMatch ? [forcedMatch] : COMPANY_INDEX.filter(c => nrm(c.name).includes(nrm(name)));
+  await push({ title: `Apollo · resolve_company("${name}")`, detail: `<span class="mono">POST /api/v1/mixed_companies/search</span> — ${matches.length} correspondência(s)` });
+
+  const resolveDecisions = evaluate({ "company.match_count": forcedMatch ? 1 : matches.length }).filter(d => d.matched);
+
+  if (resolveDecisions.some(d => d.actions.includes("stop_pipeline"))) {
+    await push({ rule: "R1.2", title: "Empresa não encontrada", tone: "bad", badge: "stop_pipeline",
+      detail: `Status <span class="mono">EMPRESA_NAO_ENCONTRADA</span>, notificação enviada ao Teams e pipeline encerrado. Nenhum crédito Apollo consumido.` });
+    log("warning", "R1.2", `Empresa não encontrada: ${name}`);
+    DB.runs.unshift({ at: now(), company: name, outcome: statusChip("EMPRESA_NAO_ENCONTRADA"), candidates: 0, saved: 0, credits: 0 });
+    p.running = false; render(); return;
+  }
+
+  if (resolveDecisions.some(d => d.actions.includes("require_domain_confirmation"))) {
+    await push({ rule: "R1.1", title: "Confirmação de domínio exigida", tone: "warn", badge: "aguardando humano",
+      detail: `${matches.length} empresas com nome parecido. O pipeline pausa aqui — enriquecer sem confirmar desperdiça crédito.` });
+    log("warning", "R1.1", `Empresa ambígua (${matches.length} matches): ${name}`);
+    p.pending = { name, matches }; p.running = false; render(); return;
+  }
+
+  const match = matches[0];
+  await push({ title: `Dynamics · upsert de conta`, detail: `<span class="mono">PATCH /accounts(new_apollo_org_id='${esc(match.domain.split(".")[0])}')</span> — ${esc(match.name)} · ${esc(match.domain)}` });
+
+  // 2. Busca de candidatos (sem consumir crédito)
+  const pool = CANDIDATE_POOLS[match.name] || CANDIDATE_POOLS._default;
+  await push({ title: `Apollo · search_people`, detail: `<span class="mono">POST /api/v1/mixed_people/search</span> — ${pool.length} candidato(s), sem consumo de crédito` });
+
+  // 3. R2.1 filtro de cargo
+  const kept = [], dropped = [];
+  for (const cand of pool) {
+    const d = evaluate({ "contact.title_matched": titleMatches(cand.title) }).filter(x => x.matched);
+    (d.some(x => x.actions.includes("discard_candidate")) ? dropped : kept).push(cand);
+  }
+  await push({ rule: "R2.1", title: `Filtro de cargo: ${kept.length} de ${pool.length} aprovados`,
+    detail: dropped.length ? `Descartados: ${dropped.map(c => `<span class="mono">${esc(c.title)}</span>`).join(", ")}` : "Todos os cargos estão na lista alvo." });
+
+  // 4. R2.3 ordenação por senioridade
+  kept.sort((a, b) => seniorityRank(a.title) - seniorityRank(b.title));
+  await push({ rule: "R2.3", title: "Ordenação por senioridade",
+    detail: kept.map(c => `<span class="mono">${esc(c.title)}</span>`).join(" › ") });
+
+  // 5. R2.2 limite por empresa
+  const selected = [], overflow = [];
+  for (const cand of kept) {
+    const d = evaluate({ "company.selected_count": selected.length }).filter(x => x.matched);
+    (d.some(x => x.actions.includes("discard_candidate")) ? overflow : selected).push(cand);
+  }
+  await push({ rule: "R2.2", title: `Limite de ${CONFIG.max_contacts_per_company} contatos por empresa`,
+    detail: overflow.length ? `Fora do corte: ${overflow.map(c => `${esc(c.first)} ${esc(c.last)}`).join(", ")}` : "Nenhum candidato excedente." });
+
+  // 6. Enriquecimento — só depois dos filtros (CLAUDE.md)
+  let co = DB.companies.find(c => c.name === match.name);
+  if (!co) {
+    co = { id: "co" + (++SEQ), apollo_org_id: "5f3a" + SEQ, name: match.name, domain: match.domain, employees: match.employees, industry: match.industry };
+    DB.companies.push(co);
+  }
+
+  const created = [];
+  for (const cand of selected) {
+    DB.quotas.apollo.used += 1;
+    const slug = nrm(cand.first + "." + cand.last).replace(/\s+/g, "");
+    const c = addContact({
+      company_id: co.id, first_name: cand.first, last_name: cand.last, title: cand.title,
+      email_status: cand.email_status, email: cand.email_status === "unavailable" ? null : slug + "@" + co.domain,
+      linkedin_url: "linkedin.com/in/" + slug, created_at: now(), enriched_at: now(),
+      trace: [{ at: now(), rule: "—", text: "Criado a partir do Apollo (people/match)" }]
+    });
+    transition(c, "ENRIQUECIDO", "—", "Enriquecido pelo Apollo");
+
+    // R3 — qualidade de e-mail
+    const decisions = evaluate({
+      "contact.email_status": c.email_status,
+      "contact.days_since_enrichment": 0
+    }).filter(d => d.matched);
+
+    let applied = "—", tone = "", badge = "";
+    for (const d of decisions) {
+      if (d.new_status && canTransition(c.status, d.new_status)) {
+        transition(c, d.new_status, d.rule_id);
+        applied = d.rule_id;
+      }
+      if (d.actions.includes("create_task")) {
+        createTask("linkedin_manual_outreach", c.id, d.rule_id);
+        applied = d.rule_id;
+      }
+    }
+    if (c.email_status === "guessed") { tone = "warn"; badge = `pendente até ${CONFIG.guessed_email_ttl_days}d`; }
+    if (c.status === "EM_VALIDACAO") { tone = "ok"; badge = "segue para validação"; }
+    if (c.status === "SEM_EMAIL") { tone = "bad"; badge = "tarefa manual criada"; }
+
+    created.push(c);
+    await push({ rule: applied, title: `${cand.first} ${cand.last} — ${cand.title}`, tone, badge,
+      detail: `<span class="mono">people/match</span> · e-mail <span class="mono">${esc(c.email_status)}</span> · gravado em <span class="mono">contact(${esc(c.dynamics_contact_id)})</span> como <span class="mono">${esc(c.status)}</span>` }, 300);
+  }
+
+  const quotaFired = checkQuotas();
+  if (quotaFired.length) {
+    await push({ rule: quotaFired[0].rule_id, title: "Limiar de quota atingido", tone: "warn", badge: "notify: teams",
+      detail: `Consumo Apollo em ${pct(DB.quotas.apollo.used, DB.quotas.apollo.total)}% — alerta configurado em ${CONFIG.apollo_credit_alert_pct}%.` }, 250);
+  }
+
+  await push({ title: "Aguardando ciclo do Sales Navigator", detail: `Os contatos em <span class="mono">EM_VALIDACAO</span> só avançam depois que a validação oficial do LinkedIn escrever <span class="mono">li_notatcompany</span> no Dynamics (até 24h). Este código nunca acessa o LinkedIn — regra R6.4.`, pending: true }, 200);
+
+  DB.runs.unshift({ at: now(), company: match.name, outcome: `<span class="chip chip--ok">concluído</span>`,
+    candidates: pool.length, saved: created.length, credits: DB.quotas.apollo.used - credits0 });
+  p.result = { company: match.name, contacts: created };
+  p.running = false;
+  render();
+}
+
+/* ── Pipeline ─────────────────────────────────────────────── */
+let pipelineFilter = "todos";
+
+function viewPipeline() {
+  const list = pipelineFilter === "todos" ? DB.contacts : DB.contacts.filter(c => c.status === pipelineFilter);
+  const stale = DB.contacts.filter(c =>
+    c.email_status === "guessed" && (now() - c.enriched_at) / DAY > CONFIG.guessed_email_ttl_days);
+
+  return `
+    ${stale.length ? `<div class="notice notice--warn">${ruleChip("R3.2")}<div>
+      <strong>${stale.length} contato(s) com e-mail <span class="mono">guessed</span> passaram da janela de ${CONFIG.guessed_email_ttl_days} dias.</strong>
+      A regra determina descarte: ${stale.map(c => esc(c.first_name + " " + c.last_name)).join(", ")}.
+      <div class="row" style="margin-top:9px"><button class="btn btn--sm" id="applyR32">Aplicar descarte</button></div>
+    </div></div>` : ""}
+
+    <section class="card">
+      <div class="card__head">
+        <h2>Contatos</h2>
+        <p>${list.length} de ${DB.contacts.length}</p>
+        <span class="spacer"></span>
+        <div class="field" style="min-width:210px">
+          <select id="pipelineFilter">
+            <option value="todos">Todos os estados</option>
+            ${Object.keys(STATUS_META).map(s => `<option value="${s}" ${pipelineFilter === s ? "selected" : ""}>${s} (${byStatus(s).length})</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div class="tablewrap">
+        <table class="tbl">
+          <thead><tr>
+            <th>Contato</th><th>Empresa</th><th>E-mail</th><th>Qualidade</th>
+            <th>Estado</th><th>LinkedIn</th><th class="num">Idade</th>
+          </tr></thead>
+          <tbody>
+            ${list.length ? list.map(c => {
+              const co = company(c.company_id);
+              return `<tr class="is-clickable" data-contact="${c.id}">
+                <td><div class="person">
+                  <span class="person__name">${esc(c.first_name)} ${esc(c.last_name)}</span>
+                  <span class="person__meta">${esc(c.title)}</span>
+                </div></td>
+                <td>${esc(co ? co.name : "—")}</td>
+                <td class="mono dim">${esc(c.email || "—")}</td>
+                <td>${emailChip(c.email_status)}</td>
+                <td>${statusChip(c.status)}</td>
+                <td>${c.not_at_company ? `<span class="chip chip--bad">not at company</span>`
+                     : c.crm_matched ? `<span class="chip chip--ok">CRM badge</span>`
+                     : `<span class="chip">sem match</span>`}</td>
+                <td class="num dim">${ago(c.created_at)}</td>
+              </tr>`;
+            }).join("") : `<tr><td colspan="7"><div class="empty">Nenhum contato neste estado.</div></td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+/* ── Validação LinkedIn ───────────────────────────────────── */
+let syncReport = null;
+
+function viewValidacao() {
+  const pend = byStatus("EM_VALIDACAO");
+  const val = byStatus("VALIDADO");
+  return `
+    ${bannerQuotas()}
+    <div class="notice notice--info">
+      ${ruleChip("R6.4")}
+      <div><strong>A validação é 100% oficial.</strong> Quem escreve <span class="mono">li_notatcompany</span> e <span class="mono">li_crmbadge</span> no Dynamics é a integração Sales Navigator ↔ Dynamics (Data Validation), em ciclo diário. Este sistema apenas <em>lê</em> esses campos. Nenhum acesso automatizado ao LinkedIn é feito nem permitido.</div>
+    </div>
+
+    <div class="split">
+      <section class="card">
+        <div class="card__head">
+          <h2>Sincronizar validação</h2>
+          <p>equivale a <span class="mono">cli sync</span></p>
+        </div>
+        <div class="card__body">
+          <div class="deflist">
+            <dt>Aguardando</dt><dd>${pend.length} contato(s) em <span class="mono">EM_VALIDACAO</span></dd>
+            <dt>Prontos</dt><dd>${val.length} contato(s) em <span class="mono">VALIDADO</span> a passar pelo gate R5.1</dd>
+            <dt>Último ciclo</dt><dd class="dim">Sales Navigator concluiu há 3h</dd>
+            <dt>Custo</dt><dd>1 update de Sales Navigator por contato lido</dd>
+          </div>
+          <div class="row">
+            <button class="btn btn--primary" id="runSync" ${DB.pipelinePaused || (!pend.length && !val.length) ? "disabled" : ""}>Rodar sync de validação</button>
+          </div>
+          ${!pend.length && !val.length ? `<div class="empty">Nada pendente. Rode uma prospecção para gerar novos contatos em validação.</div>` : ""}
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head"><h2>Resultado do último sync</h2><p>decisões por regra</p></div>
+        <div class="card__body">
+          ${syncReport ? `<div class="steps">${syncReport.map((s, i) => renderStep(s, i)).join("")}</div>`
+                       : `<div class="empty">Nenhum sync executado nesta sessão.</div>`}
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card__head"><h2>Fila de validação</h2><p>campos lidos do Dataverse</p></div>
+      <div class="tablewrap">
+        <table class="tbl">
+          <thead><tr><th>Contato</th><th>Empresa</th><th class="mono">li_crmbadge</th><th class="mono">li_notatcompany</th><th class="num">Horas no CRM</th><th>Prognóstico</th></tr></thead>
+          <tbody>
+            ${pend.length ? pend.map(c => {
+              const h = (now() - c.created_at) / HOUR;
+              let prog;
+              if (c.not_at_company) prog = `${ruleChip("R4.2")} ${statusChip("INVALIDO_SAIU_EMPRESA")}`;
+              else if (!c.crm_matched && h > CONFIG.match_timeout_hours) prog = `${ruleChip("R4.1")} ${statusChip("REVISAO_MANUAL")}`;
+              else if (c.crm_matched) prog = `${statusChip("VALIDADO")}`;
+              else prog = `<span class="chip">aguarda até ${CONFIG.match_timeout_hours}h</span>`;
+              return `<tr class="is-clickable" data-contact="${c.id}">
+                <td><div class="person"><span class="person__name">${esc(c.first_name)} ${esc(c.last_name)}</span><span class="person__meta">${esc(c.title)}</span></div></td>
+                <td>${esc(company(c.company_id).name)}</td>
+                <td>${c.crm_matched ? `<span class="chip chip--ok">true</span>` : `<span class="chip">false</span>`}</td>
+                <td>${c.not_at_company ? `<span class="chip chip--bad">true</span>` : `<span class="chip chip--ok">false</span>`}</td>
+                <td class="num">${Math.round(h)}</td>
+                <td><div class="row">${prog}</div></td>
+              </tr>`;
+            }).join("") : `<tr><td colspan="6"><div class="empty">Fila vazia.</div></td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+async function runSync() {
+  const steps = [];
+  syncReport = steps;
+  const push = async (s) => { steps.push(s); render(); await sleep(380); };
+
+  await push({ title: "Lendo contatos em EM_VALIDACAO", detail: `<span class="mono">GET /contacts?$filter=new_sdr_status eq 'EM_VALIDACAO'</span>` });
+
+  const pend = byStatus("EM_VALIDACAO").slice();
+  for (const c of pend) {
+    DB.quotas.salesnav.used += 1;
+    const hours = (now() - c.created_at) / HOUR;
+    const facts = {
+      "contact.not_at_company": c.not_at_company,
+      "contact.crm_matched": c.crm_matched,
+      "contact.hours_since_created": hours,
+      "contact.replacement_suggested": c.replacement_suggested,
+      "contact.stale_fields": c.stale_fields
+    };
+    const decisions = evaluate(facts).filter(d => d.matched);
+    let newStatus = decisions.map(d => d.new_status).find(Boolean) || null;
+    if (!newStatus && c.crm_matched && !c.not_at_company) newStatus = "VALIDADO";
+
+    const applied = decisions.find(d => d.new_status);
+    if (newStatus && transition(c, newStatus, applied ? applied.rule_id : "—")) {
+      if (newStatus === "VALIDADO") c.validated_at = now();
+    }
+
+    for (const d of decisions) {
+      if (d.actions.includes("create_task")) createTask("manual_match_review", c.id, d.rule_id);
+      if (d.actions.includes("update_crm_fields")) {
+        c.trace.push({ at: now(), rule: d.rule_id, text: `Campos desatualizados corrigidos a partir da validação: ${c.stale_fields.join(", ")}` });
+        c.stale_fields = [];
+        log("info", d.rule_id, `${c.first_name} ${c.last_name}: campos atualizados pela validação`);
+      }
+      if (d.actions.includes("create_contact_from_replacement")) {
+        const co = company(c.company_id);
+        const rep = addContact({
+          company_id: c.company_id, first_name: "Roberto", last_name: "Yamada", title: c.title,
+          email_status: "unavailable", email: null, linkedin_url: "linkedin.com/in/roberto.yamada",
+          created_at: now(), status: "NOVO",
+          trace: [{ at: now(), rule: d.rule_id, text: `Substituto sugerido pela validação do LinkedIn para ${c.first_name} ${c.last_name}` }]
+        });
+        c.replacement_suggested = false;
+        log("info", d.rule_id, `Substituto criado em ${co.name}: Roberto Yamada`);
+        await push({ rule: d.rule_id, title: `Substituto criado: Roberto Yamada`, tone: "accent", badge: "NOVO",
+          detail: `O Sales Navigator sugeriu um substituto para ${esc(c.first_name)} ${esc(c.last_name)} em ${esc(co.name)}. Entra no pipeline como contato novo, do zero.` });
+      }
+    }
+
+    const tone = newStatus === "VALIDADO" ? "ok" : newStatus === "INVALIDO_SAIU_EMPRESA" ? "bad" : newStatus ? "warn" : "";
+    const corrigidos = decisions.some(d => d.actions.includes("update_crm_fields"))
+      ? ` · <b>R4.4</b> corrigiu campos desatualizados a partir da validação` : "";
+    await push({ rule: applied ? applied.rule_id : "—",
+      title: `${c.first_name} ${c.last_name}`, tone, badge: newStatus || "sem mudança",
+      detail: newStatus
+        ? `<span class="mono">li_notatcompany=${c.not_at_company}</span> · <span class="mono">li_crmbadge=${c.crm_matched}</span> · ${Math.round(hours)}h no CRM → <span class="mono">${esc(newStatus)}</span>${corrigidos}`
+        : `Sem match no Sales Navigator, mas ainda dentro da janela de ${CONFIG.match_timeout_hours}h. Permanece em validação.${corrigidos}` });
+  }
+
+  // Gate R5.1 sobre os VALIDADOS
+  await push({ title: "Gate de cadência (R5.1)", detail: `Cada contato <span class="mono">VALIDADO</span> é reavaliado antes de entrar na fila.` });
+  for (const c of byStatus("VALIDADO").slice()) {
+    const facts = {
+      "contact.status": "VALIDADO",
+      "contact.email_status": c.email_status,
+      "contact.not_at_company": c.not_at_company,
+      "contact.days_since_validation": c.validated_at ? (now() - c.validated_at) / DAY : Infinity
+    };
+    const decisions = evaluate(facts);
+    const gate = decisions.find(d => d.rule_id === "R5.1");
+    if (gate && gate.matched) {
+      transition(c, "EM_CADENCIA", "R5.1");
+      await push({ rule: "R5.1", title: `${c.first_name} ${c.last_name}`, tone: "accent", badge: "EM_CADENCIA",
+        detail: `E-mail <span class="mono">verified</span>, <span class="mono">not_at_company=false</span>, validação de ${Math.round(facts["contact.days_since_validation"])}d — dentro dos ${CONFIG.validation_freshness_days}d. Power Automate assume a partir daqui.` });
+    } else {
+      await push({ rule: "R5.1", title: `${c.first_name} ${c.last_name}`, tone: "bad", badge: "block_cadence",
+        detail: `Gate reprovado. O ramo <span class="mono">else</span> bloqueia a cadência; nenhum e-mail é disparado.` });
+    }
+  }
+
+  const q = checkQuotas();
+  if (q.some(d => d.actions.includes("pause_pipeline"))) {
+    await push({ rule: "R6.1", title: "Limite mensal do Sales Navigator atingido", tone: "bad", badge: "pause_pipeline",
+      detail: `${DB.quotas.salesnav.used} de ${CONFIG.salesnav_monthly_update_limit} updates consumidos. Pipeline pausado até a virada do ciclo.` });
+  }
+  if (steps.length === 2) await push({ title: "Nada a fazer", detail: "Nenhum contato mudou de estado neste ciclo." });
+  render();
+}
+
+/* ── Cadência ─────────────────────────────────────────────── */
+function viewCadencia() {
+  const fila = byStatus("EM_CADENCIA");
+  const respondeu = byStatus("RESPONDEU");
+  const semResposta = byStatus("SEM_RESPOSTA");
+  const bloqueados = DB.contacts.filter(c => ["INVALIDO_BOUNCE", "INVALIDO_SAIU_EMPRESA"].includes(c.status));
+
+  return `
+    <div class="notice notice--info">
+      ${ruleChip("R5.1")}
+      <div><strong>Esta fila é o contrato com o Power Automate.</strong> O fluxo lê <span class="mono">new_sdr_status = EM_CADENCIA</span> no Dynamics e dispara os e-mails. Nenhum e-mail sai deste sistema.</div>
+    </div>
+
+    <div class="grid grid--3">
+      ${kpiCard(fila.length, "Na fila agora", "prontos para o Power Automate")}
+      ${kpiCard(respondeu.length, "Responderam", "cadência pausada por R5.2")}
+      ${kpiCard(semResposta.length, "Sem resposta", "cadência esgotada")}
+      ${kpiCard(bloqueados.length, "Bloqueados", "bounce ou saída da empresa")}
+    </div>
+
+    <section class="card">
+      <div class="card__head"><h2>Fila de cadência</h2><p>${fila.length} contato(s)</p></div>
+      <div class="tablewrap">
+        <table class="tbl">
+          <thead><tr><th>Contato</th><th>Empresa</th><th>E-mail</th><th class="num">Validado há</th><th>Frescor</th><th></th></tr></thead>
+          <tbody>
+            ${fila.length ? fila.map(c => {
+              const d = c.validated_at ? (now() - c.validated_at) / DAY : Infinity;
+              const fresh = d <= CONFIG.validation_freshness_days;
+              return `<tr class="is-clickable" data-contact="${c.id}">
+                <td><div class="person"><span class="person__name">${esc(c.first_name)} ${esc(c.last_name)}</span><span class="person__meta">${esc(c.title)}</span></div></td>
+                <td>${esc(company(c.company_id).name)}</td>
+                <td class="mono dim">${esc(c.email)}</td>
+                <td class="num">${Math.round(d)}d</td>
+                <td><div class="row">
+                  ${fresh ? `<span class="chip chip--ok">dentro de ${CONFIG.validation_freshness_days}d</span>` : `<span class="chip chip--warn">revalidar</span>`}
+                  ${c.do_not_contact ? `<span class="chip chip--bad">do_not_contact</span>` : ""}
+                </div></td>
+                <td class="num"><button class="btn btn--sm btn--ghost" data-event="reply_received" data-target="${c.id}">Simular resposta</button></td>
+              </tr>`;
+            }).join("") : `<tr><td colspan="6"><div class="empty">Fila vazia. Rode o sync de validação para promover contatos validados.</div></td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__head"><h2>Fora da cadência</h2><p>por que cada contato saiu</p></div>
+      <div class="tablewrap">
+        <table class="tbl">
+          <thead><tr><th>Contato</th><th>Empresa</th><th>Estado</th><th>Motivo</th></tr></thead>
+          <tbody>
+            ${[...respondeu, ...semResposta, ...bloqueados].map(c => {
+              const motivo = { RESPONDEU: ["R5.2", "Resposta recebida — cadência pausada e time notificado"],
+                SEM_RESPOSTA: ["—", "Sequência concluída sem retorno"],
+                INVALIDO_BOUNCE: ["R5.3", "E-mail retornou — contato invalidado na hora"],
+                INVALIDO_SAIU_EMPRESA: ["R4.2", "Not At Company confirmado pelo LinkedIn"] }[c.status];
+              return `<tr class="is-clickable" data-contact="${c.id}">
+                <td><span class="person__name">${esc(c.first_name)} ${esc(c.last_name)}</span></td>
+                <td>${esc(company(c.company_id).name)}</td>
+                <td>${statusChip(c.status)}</td>
+                <td><div class="row">${ruleChip(motivo[0])}<span class="dim">${esc(motivo[1])}</span></div></td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+/* ── Tarefas ──────────────────────────────────────────────── */
+const TASK_META = {
+  linkedin_manual_outreach: { label: "Abordagem manual no LinkedIn", desc: "Contato sem e-mail disponível. A abordagem é feita à mão, pela interface do Sales Navigator." },
+  manual_match_review:      { label: "Revisar match no Sales Navigator", desc: "O LinkedIn não encontrou correspondência dentro da janela. Um humano precisa conferir o registro." },
+  lgpd_erasure:             { label: "Exclusão de dados (LGPD)", desc: "Opt-out recebido. Remoção dos dados dentro do SLA." }
+};
+
+function viewTarefas() {
+  const open = DB.tasks.filter(t => !t.done);
+  const done = DB.tasks.filter(t => t.done);
+  const row = t => {
+    const c = contact(t.contact_id);
+    const meta = TASK_META[t.type];
+    const sla = t.sla_hours ? (t.created_at + t.sla_hours * HOUR - now()) / HOUR : null;
+    return `<tr class="is-clickable" data-contact="${t.contact_id}">
+      <td>${ruleChip(t.rule)}</td>
+      <td><div class="person"><span class="person__name">${esc(meta.label)}</span><span class="person__meta">${esc(meta.desc)}</span></div></td>
+      <td>${c ? esc(c.first_name + " " + c.last_name) : "—"}<div class="person__meta">${c ? esc(company(c.company_id).name) : ""}</div></td>
+      <td class="num dim">${ago(t.created_at)}</td>
+      <td>${sla == null ? `<span class="dim">—</span>`
+            : sla > 0 ? `<span class="chip chip--warn">${Math.round(sla)}h restantes</span>`
+                      : `<span class="chip chip--bad">SLA vencido</span>`}</td>
+      <td class="num">${t.done ? `<span class="chip chip--ok">concluída</span>` : `<button class="btn btn--sm" data-done="${t.id}">Concluir</button>`}</td>
+    </tr>`;
+  };
+  return `
+    <div class="grid grid--3">
+      ${kpiCard(open.length, "Tarefas abertas", "geradas por create_task")}
+      ${kpiCard(open.filter(t => t.type === "linkedin_manual_outreach").length, "Abordagem manual", "contatos sem e-mail (R3.3)")}
+      ${kpiCard(open.filter(t => t.type === "manual_match_review").length, "Revisão de match", "sem correspondência (R4.1)")}
+      ${kpiCard(open.filter(t => t.type === "lgpd_erasure").length, "LGPD", "SLA de 48h (R6.3)")}
+    </div>
+    <section class="card">
+      <div class="card__head"><h2>Fila humana</h2><p>${open.length} aberta(s), ${done.length} concluída(s)</p></div>
+      <div class="tablewrap"><table class="tbl">
+        <thead><tr><th>Regra</th><th>Tarefa</th><th>Contato</th><th class="num">Criada há</th><th>SLA</th><th></th></tr></thead>
+        <tbody>${DB.tasks.length ? [...open, ...done].map(row).join("") : `<tr><td colspan="6"><div class="empty">Nenhuma tarefa.</div></td></tr>`}</tbody>
+      </table></div>
+    </section>`;
+}
+
+/* ── Regras ───────────────────────────────────────────────── */
+let simFacts = {
+  "contact.email_status": "verified",
+  "contact.not_at_company": false,
+  "contact.crm_matched": true,
+  "contact.status": "VALIDADO",
+  "contact.days_since_validation": 2,
+  "contact.days_since_enrichment": 3,
+  "contact.hours_since_created": 30,
+  "event.type": "—"
+};
+let simResult = null;
+
+function condText(c) {
+  const v = resolveValue(c.value);
+  const shown = typeof c.value === "string" && c.value.startsWith("${")
+    ? `${c.value} → ${v}` : JSON.stringify(v);
+  return `${c.field} <b>${c.op}</b> ${c.op === "not_empty" ? "" : shown}`;
+}
+
+function viewRegras() {
+  const groups = [...new Set(RULES.map(r => r.grupo))];
+  const firedIds = simResult ? simResult.filter(d => d.matched).map(d => d.rule_id) : [];
+
+  return `
+    <section class="card">
+      <div class="card__head">
+        <h2>Máquina de estados</h2>
+        <p>transições permitidas — nenhuma decisão sai disso</p>
+      </div>
+      <div class="card__body">
+        <div class="diagram" id="smDiagram"></div>
+      </div>
+    </section>
+
+    <div class="split">
+      <section class="card">
+        <div class="card__head">
+          <h2>Simulador de regras</h2>
+          <p>os mesmos fatos que o pipeline monta em produção</p>
+        </div>
+        <div class="card__body">
+          <div class="grid grid--3" style="gap:11px">
+            ${simSelect("contact.email_status", ["verified", "guessed", "unavailable"])}
+            ${simSelect("contact.status", Object.keys(STATUS_META))}
+            ${simSelect("contact.not_at_company", [false, true])}
+            ${simSelect("contact.crm_matched", [true, false])}
+            ${simNumber("contact.days_since_validation")}
+            ${simNumber("contact.days_since_enrichment")}
+            ${simNumber("contact.hours_since_created")}
+            ${simSelect("event.type", ["—", "reply_received", "email_bounced", "opt_out_received", "set_validation_ignore", "linkedin_direct_access_attempt"])}
+          </div>
+          <div class="row"><button class="btn btn--primary" id="runSim">Avaliar regras</button></div>
+          ${simResult ? renderSimResult(simResult) : `<div class="empty">Ajuste os fatos e avalie para ver quais regras disparam.</div>`}
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head"><h2>Transições</h2><p>state_machine do rules.yaml</p></div>
+        <div class="tablewrap"><table class="tbl">
+          <thead><tr><th>De</th><th>Para</th></tr></thead>
+          <tbody>${Object.entries(STATE_MACHINE.transitions).map(([k, v]) => `<tr>
+            <td class="mono">${esc(k)}</td>
+            <td><div class="row">${v.map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div></td>
+          </tr>`).join("")}</tbody>
+        </table></div>
+      </section>
+    </div>
+
+    ${groups.map(g => `
+      <section class="card">
+        <div class="card__head"><h2>${esc(g)}</h2><p>${RULES.filter(r => r.grupo === g).length} regra(s)</p></div>
+        <div class="card__body">
+          ${RULES.filter(r => r.grupo === g).map(r => `
+            <article class="rule ${firedIds.includes(r.id) ? "rule--fired" : ""}">
+              <div class="rule__head">
+                ${ruleChip(r.id)}
+                <span class="rule__desc">${esc(r.description)}</span>
+                ${r.priority === "highest" ? `<span class="chip chip--bad">priority: highest</span>` : ""}
+                ${firedIds.includes(r.id) ? `<span class="chip chip--accent">disparou na simulação</span>` : ""}
+              </div>
+              <div class="rule__body">
+                <div class="rule__col"><span>when (E)</span>${r.when.map(c => `<span class="rule__cond">${condText(c)}</span>`).join("")}</div>
+                <div class="rule__col"><span>then</span>${r.then.map(a => `<span class="rule__cond">${esc(a.action)}${a.value ? " → " + esc(a.value) : ""}${a.type ? " (" + esc(a.type) + ")" : ""}${a.channel ? " (" + esc(a.channel) + ")" : ""}</span>`).join("")}</div>
+                ${r.else ? `<div class="rule__col"><span>else</span>${r.else.map(a => `<span class="rule__cond">${esc(a.action)}</span>`).join("")}</div>` : ""}
+              </div>
+            </article>`).join("")}
+        </div>
+      </section>`).join("")}
+
+    <section class="card">
+      <div class="card__head"><h2>Tratamento de erros</h2><p>error_handling do rules.yaml</p></div>
+      <div class="tablewrap"><table class="tbl">
+        <thead><tr><th>Erro</th><th class="num">Retentativas</th><th>Backoff</th><th>Ao falhar</th></tr></thead>
+        <tbody>${ERROR_HANDLING.map(e => `<tr>
+          <td class="mono">${esc(e.erro)}</td><td class="num">${e.retry}</td>
+          <td class="mono dim">${esc(e.backoff)}</td><td class="mono">${esc(e.on_fail)}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </section>`;
+}
+
+function simSelect(field, opts) {
+  return `<div class="field">
+    <label for="sim_${field}">${esc(field)}</label>
+    <select id="sim_${field}" data-sim="${field}">
+      ${opts.map(o => `<option value="${esc(String(o))}" ${String(simFacts[field]) === String(o) ? "selected" : ""}>${esc(String(o))}</option>`).join("")}
+    </select>
+  </div>`;
+}
+function simNumber(field) {
+  return `<div class="field">
+    <label for="sim_${field}">${esc(field)}</label>
+    <input type="number" id="sim_${field}" data-sim="${field}" value="${esc(simFacts[field])}" min="0">
+  </div>`;
+}
+
+function renderSimResult(decisions) {
+  const fired = decisions.filter(d => d.matched);
+  const gates = decisions.filter(d => !d.matched);
+  const status = fired.map(d => d.new_status).find(Boolean);
+  const from = simFacts["contact.status"];
+  const allowed = status ? canTransition(from, status) : null;
+
+  return `<div class="stack">
+    ${status ? (allowed
+      ? `<div class="notice notice--ok"><div><strong>Resultado:</strong> ${statusChip(from)} → ${statusChip(status)} — transição permitida pela máquina de estados.</div></div>`
+      : `<div class="notice notice--bad"><div><strong>Transição bloqueada:</strong> ${esc(from)} → ${esc(status)} não está em <span class="mono">state_machine.transitions</span>. A ação da regra não é aplicada.</div></div>`)
+      : `<div class="notice notice--info"><div><strong>Nenhuma mudança de estado.</strong> As regras disparadas não contêm <span class="mono">set_status</span>.</div></div>`}
+    ${fired.length ? `<div class="stack">
+      <div class="eyebrow">Regras disparadas</div>
+      ${fired.map(d => `<div class="row">${ruleChip(d.rule_id)}<span class="mono dim">${d.actions.map(esc).join(" · ")}</span></div>`).join("")}
+    </div>` : ""}
+    ${gates.length ? `<div class="stack">
+      <div class="eyebrow">Ramos else (gates reprovados)</div>
+      ${gates.map(d => `<div class="row">${ruleChip(d.rule_id)}<span class="mono dim">${d.actions.map(esc).join(" · ")}</span></div>`).join("")}
+    </div>` : ""}
+  </div>`;
+}
+
+function drawStateMachine() {
+  const el = document.getElementById("smDiagram");
+  if (!el) return;
+  const W = 160, H = 30;
+  const chain = [["NOVO", 20], ["ENRIQUECIDO", 200], ["EM_VALIDACAO", 380], ["VALIDADO", 560], ["EM_CADENCIA", 740], ["RESPONDEU", 920]];
+  const branch = [["EMPRESA_NAO_ENCONTRADA", 20], ["SEM_EMAIL", 200], ["REVISAO_MANUAL", 380], ["INVALIDO_SAIU_EMPRESA", 560], ["INVALIDO_BOUNCE", 740], ["SEM_RESPOSTA", 920]];
+  const TONE = { ok: "var(--ok)", warn: "var(--warn)", bad: "var(--bad)", accent: "var(--accent)", "": "var(--ink-3)" };
+
+  const box = (label, x, y) => {
+    const tone = TONE[STATUS_META[label].tone];
+    return `<g>
+      <rect x="${x}" y="${y}" width="${W}" height="${H}" rx="5" style="fill:var(--surface-2);stroke:${tone};stroke-width:1.2"/>
+      <text x="${x + W / 2}" y="${y + H / 2 + 3.5}" text-anchor="middle"
+            style="font-family:var(--mono);font-size:10px;fill:${tone};letter-spacing:.5px">${label}</text>
+    </g>`;
+  };
+  const stroke = "style=\"stroke:var(--line-2);stroke-width:1.2\"";
+  const dashed = "style=\"stroke:var(--line-2);stroke-width:1.2;stroke-dasharray:3 3\"";
+  const arrows = [];
+  for (let i = 0; i < chain.length - 1; i++) {
+    arrows.push(`<line x1="${chain[i][1] + W}" y1="39" x2="${chain[i + 1][1] - 4}" y2="39" ${stroke} marker-end="url(#ah)"/>`);
+  }
+  for (let i = 0; i < 5; i++) {
+    const cx = chain[i][1] + W / 2;
+    arrows.push(`<line x1="${cx}" y1="54" x2="${cx}" y2="136" ${dashed} marker-end="url(#ah)"/>`);
+  }
+  arrows.push(`<path d="M 870 54 L 870 95 L 1000 95 L 1000 136" marker-end="url(#ah)"
+    style="fill:none;stroke:var(--line-2);stroke-width:1.2;stroke-dasharray:3 3"/>`);
+
+  el.innerHTML = `<svg viewBox="0 0 1100 190" role="img" aria-label="Diagrama da máquina de estados do contato">
+    <defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 z" style="fill:var(--line-2)"/>
+    </marker></defs>
+    ${arrows.join("")}
+    ${chain.map(([l, x]) => box(l, x, 24)).join("")}
+    ${branch.map(([l, x]) => box(l, x, 140)).join("")}
+    <text x="20" y="128" style="font-family:var(--mono);font-size:9px;fill:var(--ink-3);letter-spacing:1.2px">TERMINAIS</text>
+  </svg>`;
+}
+
+/* ── Configuração ─────────────────────────────────────────── */
+function viewConfig() {
+  const num = (key, label, hint) => `<div class="field">
+    <label for="cfg_${key}">${esc(label)}</label>
+    <input type="number" id="cfg_${key}" data-cfg="${key}" value="${CONFIG[key]}" min="1">
+    <span class="kpi__note">${esc(hint)}</span>
+  </div>`;
+
+  return `
+    <div class="notice notice--info"><div>
+      <strong>Nada de número mágico no código.</strong> Estes valores vivem em <span class="mono">config/config.yaml</span> e são lidos pelas regras via <span class="mono">${"${config.*}"}</span>. Alterá-los aqui muda o comportamento das próximas execuções neste mockup.
+    </div></div>
+
+    <div class="split">
+      <section class="card">
+        <div class="card__head"><h2>Parâmetros</h2><p>config.yaml</p></div>
+        <div class="card__body">
+          <div class="grid grid--2" style="gap:12px">
+            ${num("max_contacts_per_company", "max_contacts_per_company", "usado por R2.2")}
+            ${num("guessed_email_ttl_days", "guessed_email_ttl_days", "usado por R3.2")}
+            ${num("match_timeout_hours", "match_timeout_hours", "usado por R4.1")}
+            ${num("validation_freshness_days", "validation_freshness_days", "usado por R5.1")}
+            ${num("salesnav_monthly_update_limit", "salesnav_monthly_update_limit", "usado por R6.1")}
+            ${num("apollo_credit_alert_pct", "apollo_credit_alert_pct", "usado por R6.2")}
+          </div>
+          <hr class="hr">
+          <div class="stack">
+            <div class="eyebrow">target_titles</div>
+            <div class="row">${CONFIG.target_titles.map(t => `<span class="chip chip--accent">${esc(t)}</span>`).join("")}</div>
+            <div class="eyebrow">seniority_order</div>
+            <div class="row">${CONFIG.seniority_order.map((t, i) => `<span class="chip">${i}. ${esc(t)}</span>`).join("")}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head"><h2>Pré-requisitos de licença</h2><p>fora do código</p></div>
+        <div class="card__body">
+          <div class="stack">
+            ${[
+              ["Apollo.io", "Conta com créditos de e-mail e API key ativa.", "ok"],
+              ["Dynamics 365 Sales", "Campos custom new_apollo_org_id, new_apollo_person_id, new_email_status, new_linkedin_url, new_sdr_status.", "ok"],
+              ["Sales Navigator Advanced Plus", "Via Microsoft Relationship Sales Plus, com CRM Sync e Data Validation ativados pelos admins.", "ok"],
+              ["Entra ID", "App registration com permissão Dataverse (client credentials).", "ok"],
+              ["Power Automate", "Fluxo que lê new_sdr_status = EM_CADENCIA e dispara a sequência de e-mails.", "warn"]
+            ].map(([t, d, tone]) => `<div class="notice notice--${tone === "ok" ? "ok" : "warn"}">
+              <div><strong>${esc(t)}</strong><br><span class="dim">${esc(d)}</span></div>
+            </div>`).join("")}
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card__head"><h2>Mapeamento Apollo → Dataverse</h2><p>mappings/apollo_dynamics.yaml</p></div>
+      <div class="card__body">
+        <div class="grid grid--2">
+          ${[["account", "Conta (account)"], ["contact", "Contato (contact)"]].map(([k, label]) => `
+            <div class="stack">
+              <div class="eyebrow">${esc(label)}</div>
+              <div class="tablewrap"><table class="tbl">
+                <thead><tr><th>Campo Dataverse</th><th>Origem</th></tr></thead>
+                <tbody>${FIELD_MAP[k].map(([a, b]) => `<tr><td class="mono">${esc(a)}</td><td class="mono dim">${esc(b)}</td></tr>`).join("")}</tbody>
+              </table></div>
+            </div>`).join("")}
+        </div>
+        <div class="notice notice--warn">${ruleChip("R6.4")}<div>
+          <strong>Campos somente leitura.</strong> ${FIELD_MAP.validation.map(([a]) => `<span class="mono">${esc(a)}</span>`).join(" e ")} são escritos pela integração oficial do Sales Navigator. Confirme os logical names no tenant antes do go-live — este sistema apenas lê.
+        </div></div>
+      </div>
+    </section>`;
+}
+
+/* ── Registro ─────────────────────────────────────────────── */
+let logFilter = "todos";
+
+function viewLogs() {
+  const list = logFilter === "todos" ? DB.logs : DB.logs.filter(l => l.level === logFilter);
+  const tone = { info: "", warning: "warn", error: "bad", critical: "bad" };
+  return `
+    <section class="card">
+      <div class="card__head">
+        <h2>Log estruturado</h2>
+        <p>cada linha carrega contact_id, rule_id e decisão</p>
+        <span class="spacer"></span>
+        <div class="field" style="min-width:180px">
+          <select id="logFilter">
+            ${["todos", "info", "warning", "error", "critical"].map(l =>
+              `<option value="${l}" ${logFilter === l ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div class="card__body card__body--flush">
+        ${list.length ? list.map(l => `<div class="logline">
+          <span class="logline__ts">${clock(l.at)}</span>
+          <span><span class="chip ${tone[l.level] ? "chip--" + tone[l.level] : ""}">${esc(l.level)}</span></span>
+          <span class="logline__msg">${l.rule !== "—" ? ruleChip(l.rule) + " " : ""}${esc(l.msg)}</span>
+        </div>`).join("") : `<div class="empty">Nenhuma entrada neste nível.</div>`}
+      </div>
+    </section>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   7. GAVETA DE CONTATO
+   ═══════════════════════════════════════════════════════════════ */
+
+function openDrawer(id) {
+  drawerContact = id;
+  renderDrawer(id);
+  $("#drawer").classList.add("is-open");
+  $("#drawer").setAttribute("aria-hidden", "false");
+  $("#scrim").classList.add("is-open");
+}
+function closeDrawer() {
+  drawerContact = null;
+  $("#drawer").classList.remove("is-open");
+  $("#drawer").setAttribute("aria-hidden", "true");
+  $("#scrim").classList.remove("is-open");
+}
+
+function renderDrawer(id) {
+  const c = contact(id);
+  if (!c) { closeDrawer(); return; }
+  const co = company(c.company_id);
+  const tasks = DB.tasks.filter(t => t.contact_id === c.id);
+
+  $("#drawerHead").innerHTML = `
+    <div class="person" style="flex:1">
+      <span class="person__name" style="font-size:15px">${esc(c.first_name)} ${esc(c.last_name)}</span>
+      <span class="person__meta">${esc(c.title)} · ${esc(co.name)}</span>
+      <div class="row" style="margin-top:7px">${statusChip(c.status)}${emailChip(c.email_status)}${c.do_not_contact ? `<span class="chip chip--bad">do_not_contact</span>` : ""}</div>
+    </div>
+    <button class="btn btn--sm btn--ghost" id="closeDrawer" aria-label="Fechar">Fechar</button>`;
+
+  const gateFacts = {
+    "contact.status": c.status,
+    "contact.email_status": c.email_status,
+    "contact.not_at_company": c.not_at_company,
+    "contact.days_since_validation": c.validated_at ? (now() - c.validated_at) / DAY : Infinity
+  };
+  const gate = evaluate(gateFacts).find(d => d.rule_id === "R5.1");
+
+  $("#drawerBody").innerHTML = `
+    <div class="stack">
+      <div class="eyebrow">Registro no Dynamics</div>
+      <dl class="deflist">
+        <dt>contactid</dt><dd class="mono">${esc(c.dynamics_contact_id)}</dd>
+        <dt>apollo id</dt><dd class="mono">${esc(c.apollo_person_id)}</dd>
+        <dt>e-mail</dt><dd class="mono">${esc(c.email || "—")}</dd>
+        <dt>linkedin</dt><dd class="mono dim">${esc(c.linkedin_url || "—")}</dd>
+        <dt>new_sdr_status</dt><dd class="mono">${esc(c.status)}</dd>
+        <dt>li_crmbadge</dt><dd class="mono">${c.crm_matched}</dd>
+        <dt>li_notatcompany</dt><dd class="mono">${c.not_at_company}</dd>
+        <dt>criado há</dt><dd>${ago(c.created_at)}</dd>
+        <dt>validado</dt><dd>${c.validated_at ? "há " + ago(c.validated_at) : "—"}</dd>
+      </dl>
+    </div>
+
+    <div class="stack">
+      <div class="eyebrow">Gate de cadência (R5.1)</div>
+      ${gateVerdict(c, gate)}
+      <div class="stack">
+        ${RULES.find(r => r.id === "R5.1").when.map(cond => {
+          const ok = checkCond(cond, gateFacts);
+          return `<div class="cond">
+            <span class="chip chip--${ok ? "ok" : "bad"}">${ok ? "ok" : "não"}</span>
+            <span class="cond__txt">${condText(cond)}</span>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>
+
+    ${tasks.length ? `<div class="stack">
+      <div class="eyebrow">Tarefas ligadas</div>
+      ${tasks.map(t => `<div class="row">${ruleChip(t.rule)}<span>${esc(TASK_META[t.type].label)}</span>${t.done ? `<span class="chip chip--ok">concluída</span>` : `<span class="chip chip--warn">aberta</span>`}</div>`).join("")}
+    </div>` : ""}
+
+    <div class="stack">
+      <div class="eyebrow">Histórico de decisões</div>
+      <div class="timeline">
+        ${[...c.trace].reverse().map(t => `<div class="tl">
+          <div class="tl__when">${clock(t.at)} · há ${ago(t.at)}</div>
+          <div class="tl__what">${t.rule !== "—" ? ruleChip(t.rule) : ""}<span>${esc(t.text)}</span></div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+}
+
+/* O gate só é uma reprovação para quem ainda está a caminho da cadência.
+   Para quem já passou (ou já saiu por outra regra), explica o estado real. */
+function gateVerdict(c, gate) {
+  if (["EM_CADENCIA", "RESPONDEU", "SEM_RESPOSTA"].includes(c.status))
+    return `<div class="notice notice--ok"><div>Já aprovado no gate — o contato entrou na fila de cadência${c.status !== "EM_CADENCIA" ? ` e hoje está em <span class="mono">${esc(c.status)}</span>` : ""}.</div></div>`;
+  if (c.status.startsWith("INVALIDO") || c.status === "SEM_EMAIL" || c.status === "REVISAO_MANUAL")
+    return `<div class="notice notice--bad"><div>Fora do funil em <span class="mono">${esc(c.status)}</span>. O gate não se aplica: o contato não volta à cadência sem intervenção humana.</div></div>`;
+  if (gate && gate.matched)
+    return `<div class="notice notice--ok"><div>Todas as condições atendidas. O contato pode entrar em <span class="mono">EM_CADENCIA</span> no próximo sync.</div></div>`;
+  return `<div class="notice notice--warn"><div><strong>Ainda não elegível.</strong> ${gateBlockReason(c, {
+    "contact.status": c.status, "contact.email_status": c.email_status,
+    "contact.not_at_company": c.not_at_company,
+    "contact.days_since_validation": c.validated_at ? (now() - c.validated_at) / DAY : Infinity
+  })}</div></div>`;
+}
+
+function gateBlockReason(c, facts) {
+  const fails = RULES.find(r => r.id === "R5.1").when.filter(cond => !checkCond(cond, facts));
+  const map = {
+    "contact.email_status": "o e-mail não está <span class=\"mono\">verified</span>",
+    "contact.not_at_company": "o LinkedIn marcou <span class=\"mono\">Not At Company</span>",
+    "contact.days_since_validation": `a validação tem mais de ${CONFIG.validation_freshness_days} dias`,
+    "contact.status": `o estado atual é <span class="mono">${esc(c.status)}</span>, não <span class="mono">VALIDADO</span>`
+  };
+  return "Falha em: " + fails.map(f => map[f.field]).join("; ") + ".";
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. EVENTOS SIMULADOS
+   ═══════════════════════════════════════════════════════════════ */
+
+function fireEvent(type, targetId) {
+  const consoleEl = document.getElementById("eventConsole");
+  const lines = [];
+
+  let target = targetId ? contact(targetId) : null;
+  if (!target && ["reply_received", "email_bounced", "opt_out_received"].includes(type)) {
+    target = byStatus("EM_CADENCIA")[0];
+  }
+
+  const facts = { "event.type": type, "event.actor": "robot" };
+  const decisions = evaluate(facts).filter(d => d.matched);
+
+  lines.push(`<i>${clock(now())}</i> evento <b>${esc(type)}</b>${target ? ` · alvo ${esc(target.first_name)} ${esc(target.last_name)}` : ""}`);
+
+  if (!decisions.length) {
+    lines.push(`<i>nenhuma regra correspondeu</i>`);
+  }
+
+  for (const d of decisions) {
+    lines.push(`<b>${d.rule_id}</b> → ${d.actions.join(", ")}`);
+
+    if (d.actions.includes("reject_event")) {
+      const level = d.rule_id === "R6.4" ? "critical" : "error";
+      log(level, d.rule_id, `Evento ${type} rejeitado pelo motor de regras`);
+      lines.push(d.rule_id === "R6.4"
+        ? `<i>bloqueado — acesso não-oficial ao LinkedIn é proibido pela arquitetura</i>`
+        : `<i>bloqueado — o valor Ignore só pode ser definido por uma pessoa</i>`);
+      continue;
+    }
+
+    if (target && d.new_status) {
+      if (transition(target, d.new_status, d.rule_id)) {
+        lines.push(`<i>${esc(target.first_name)} ${esc(target.last_name)} → ${d.new_status}</i>`);
+      } else {
+        lines.push(`<i>transição ${target.status} → ${d.new_status} bloqueada pela máquina de estados</i>`);
+      }
+    }
+    if (target && d.actions.includes("set_field")) {
+      target.do_not_contact = true;
+      target.trace.push({ at: now(), rule: d.rule_id, text: "do_not_contact = true (opt-out LGPD)" });
+      lines.push(`<i>do_not_contact = true</i>`);
+    }
+    if (target && d.actions.includes("remove_from_cadence") && !d.new_status) {
+      target.trace.push({ at: now(), rule: d.rule_id, text: "Removido da cadência" });
+      lines.push(`<i>removido da fila de cadência</i>`);
+    }
+    if (target && d.actions.includes("create_task")) {
+      const spec = d.raw.find(a => a.action === "create_task");
+      createTask(spec.type, target.id, d.rule_id, spec.sla_hours);
+      lines.push(`<i>tarefa ${spec.type}${spec.sla_hours ? ` · SLA ${spec.sla_hours}h` : ""}</i>`);
+    }
+    if (d.actions.includes("notify")) lines.push(`<i>notificação enviada ao Teams</i>`);
+  }
+
+  render();
+  const el = document.getElementById("eventConsole");
+  if (el) el.innerHTML = lines.join("\n");
+  else if (consoleEl) consoleEl.innerHTML = lines.join("\n");
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   9. LIGAÇÃO COM O DOM
+   ═══════════════════════════════════════════════════════════════ */
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-view], [data-goto], [data-contact], [data-event], [data-fill], [data-confirm], [data-done], #runProspect, #clearProspect, #runSync, #runSim, #applyR32, #closeDrawer");
+  if (!t) return;
+
+  if (t.dataset.view) return go(t.dataset.view);
+  if (t.dataset.goto) return go(t.dataset.goto);
+  if (t.id === "closeDrawer") return closeDrawer();
+
+  if (t.dataset.event) {
+    e.stopPropagation();
+    return fireEvent(t.dataset.event, t.dataset.target || null);
+  }
+  if (t.dataset.contact) return openDrawer(t.dataset.contact);
+  if (t.dataset.fill) {
+    prospectState.input = t.dataset.fill;
+    prospectState.steps = []; prospectState.result = null; prospectState.pending = null;
+    return render();
+  }
+  if (t.id === "runProspect") {
+    const name = ($("#companyInput").value || "").trim();
+    if (!name) return;
+    prospectState.input = name;
+    return runProspect(name);
+  }
+  if (t.dataset.confirm != null) {
+    const p = prospectState.pending;
+    prospectState.pending = null;
+    if (t.dataset.confirm === "cancel") { prospectState.steps = []; return render(); }
+    const chosen = p.matches[Number(t.dataset.confirm)];
+    log("info", "R1.1", `Domínio confirmado por operador: ${chosen.domain}`);
+    return runProspect(chosen.name, chosen);
+  }
+  if (t.id === "clearProspect") {
+    prospectState = { input: prospectState.input, steps: [], running: false, pending: null, result: null };
+    return render();
+  }
+  if (t.id === "runSync") return runSync();
+  if (t.id === "runSim") {
+    simResult = evaluate(Object.fromEntries(Object.entries(simFacts).filter(([, v]) => v !== "—")));
+    return render();
+  }
+  if (t.id === "applyR32") {
+    for (const c of DB.contacts.filter(x => x.email_status === "guessed" && (now() - x.enriched_at) / DAY > CONFIG.guessed_email_ttl_days)) {
+      c.trace.push({ at: now(), rule: "R3.2", text: `Descartado: e-mail guessed sem confirmação em ${CONFIG.guessed_email_ttl_days} dias` });
+      log("info", "R3.2", `${c.first_name} ${c.last_name} descartado (guessed além da janela)`);
+      DB.contacts = DB.contacts.filter(x => x.id !== c.id);
+    }
+    return render();
+  }
+  if (t.dataset.done) {
+    const task = DB.tasks.find(x => x.id === t.dataset.done);
+    if (task) { task.done = true; log("info", task.rule, `Tarefa ${task.type} concluída`); }
+    return render();
+  }
+});
+
+document.addEventListener("change", (e) => {
+  const el = e.target;
+  if (el.id === "pipelineFilter") { pipelineFilter = el.value; return render(); }
+  if (el.id === "logFilter") { logFilter = el.value; return render(); }
+  if (el.dataset.sim) {
+    const raw = el.value;
+    simFacts[el.dataset.sim] = el.type === "number" ? Number(raw)
+      : raw === "true" ? true : raw === "false" ? false : raw;
+    return;
+  }
+  if (el.dataset.cfg) {
+    CONFIG[el.dataset.cfg] = Number(el.value);
+    DB.quotas.salesnav.limit = CONFIG.salesnav_monthly_update_limit;
+    log("info", "—", `Parâmetro ${el.dataset.cfg} alterado para ${el.value}`);
+    return render();
+  }
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target.id === "companyInput") prospectState.input = e.target.value;
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && drawerContact) closeDrawer();
+  if (e.key === "Enter" && document.activeElement && document.activeElement.id === "companyInput") {
+    const name = document.activeElement.value.trim();
+    if (name && !prospectState.running) runProspect(name);
+  }
+});
+
+$("#scrim").addEventListener("click", closeDrawer);
+
+seed();
+go("painel");
+</script>
